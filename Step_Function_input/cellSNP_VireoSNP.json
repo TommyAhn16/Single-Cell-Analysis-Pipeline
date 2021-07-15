@@ -1,0 +1,9 @@
+{
+    "sample_id": "21_01101_LI_SING",
+    "download_bucket": "cellranger-result-bucket",
+    "upload_bucket": "cellsnp-original-result",
+    "threads": "22",
+    "min_MAF": "0.1",
+    "min_count": "100",
+    "n_donor": "4"
+}
