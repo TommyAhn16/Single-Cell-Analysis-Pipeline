@@ -1,0 +1,58 @@
+import os
+import boto3
+import subprocess
+from subprocess import CalledProcessError
+import sys
+
+# Env variables
+sample_id = os.environ['sample_id']
+download_bucket = os.environ['download_bucket']
+upload_bucket = os.environ['upload_bucket']
+n_donor = os.environ['n_donor']
+
+# Function to run shell commands
+def run_command(cmd):
+    try :
+        subprocess.run(f'echo {cmd}',shell=True)
+        subprocess.run(cmd,shell=True,stderr=subprocess.PIPE,check=True)
+    except CalledProcessError as e:
+        print(f"Stderr: {e.stderr}")
+        return False
+    return True
+
+# Download files from CellSNP result
+cmd = f"aws s3 sync s3://{download_bucket}/{sample_id} ./{sample_id}_cellSNP"
+if not run_command(cmd):
+    sys.exit()
+
+
+# Run command
+cell_snp_path = os.path.join(os.getcwd(), f"{sample_id}_cellSNP")
+output_path = os.path.join(os.getcwd(), f"{sample_id}")
+cmd = f"vireo -c {cell_snp_path} -N {n_donor} -o {output_path}"
+if not run_command(cmd):
+    sys.exit()
+
+# Upload output files
+s3_resource = boto3.resource('s3')
+
+# Upload function
+def upload_obj(s3_resource, bucket_name, path, key):
+    if os.path.isdir(path):
+        for file in os.listdir(path):
+            upload_obj(s3_resource, bucket_name, os.path.join(
+                path, file), os.path.join(key, file))
+        return
+    obj = s3_resource.Bucket(bucket_name).Object(key)
+    with open(path, 'rb') as data:
+        obj.upload_fileobj(data)
+    print(f"{key} uploaded")
+    return
+
+upload_obj(s3_resource, upload_bucket, output_path, sample_id)
+
+# Clean up
+subprocess.run("df -h",shell=True)
+subprocess.run(f"rm -rf {output_path}",shell=True)
+subprocess.run(f"rm -rf {cell_snp_path}",shell=True)
+subprocess.run("df -h",shell=True)
