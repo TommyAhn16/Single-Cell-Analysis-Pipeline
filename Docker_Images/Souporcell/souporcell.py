@@ -44,8 +44,7 @@ for dirpath, dirnames, filenames in os.walk(download_path):
             bamfile_path = os.path.join(dirpath, file)
         elif file == "barcodes.tsv.gz":
             cmd = f"gunzip {os.path.join(dirpath,file)}"
-            os.system(f"echo {cmd}")
-            os.system(cmd)
+            run_command(cmd)
             barcode_path = os.path.join(dirpath, "barcodes.tsv")
         elif file == "barcodes.tsv":
             barcode_path = os.path.join(dirpath, file)

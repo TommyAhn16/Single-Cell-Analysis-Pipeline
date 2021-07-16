@@ -1,0 +1,205 @@
+{
+    "Comment": "Single Cell pipeline state machine",
+    "StartAt": "Cell Ranger",
+    "States": {
+      "Cell Ranger": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::batch:submitJob.sync",
+        "Parameters": {
+          "JobDefinition": "arn:aws:batch:ap-northeast-2:901858906361:job-definition/Cellranger:4",
+          "JobName.$": "$.sample_id",
+          "JobQueue": "arn:aws:batch:ap-northeast-2:901858906361:job-queue/CellRanger_500GB",
+          "ContainerOverrides": {
+            "Environment": [
+              {
+                "Name": "download_bucket",
+                "Value.$": "$.download_bucket"
+              },
+              {
+                "Name": "upload_bucket",
+                "Value.$": "$.upload_bucket"
+              },
+              {
+                "Name": "sample_id",
+                "Value.$": "$.sample_id"
+              },
+              {
+                "Name": "core",
+                "Value.$": "$.core"
+              },
+              {
+                "Name": "memory",
+                "Value.$": "$.memory"
+              },
+              {
+                "Name": "expect_cells",
+                "Value.$": "$.expect_cells"
+              },
+              {
+                "Name": "threads",
+                "Value.$": "$.threads"
+              },
+              {
+                "Name": "min_MAF",
+                "Value.$": "$.min_MAF"
+              },
+              {
+                "Name": "min_count",
+                "Value.$": "$.min_count"
+              },
+              {
+                "Name": "n_donor",
+                "Value.$": "$.n_donor"
+              }
+            ]
+          }
+        },
+        "Next": "Parallel"
+      },
+      "Parallel": {
+        "Type": "Parallel",
+        "Branches": [
+          {
+            "StartAt": "filter_1",
+            "States": {
+              "filter_1": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:ap-northeast-2:901858906361:function:cellSNP_filter",
+                "Next": "CellSNP"
+              },
+              "CellSNP": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::batch:submitJob.sync",
+                "Parameters": {
+                  "JobDefinition": "arn:aws:batch:ap-northeast-2:901858906361:job-definition/cellSNP:1",
+                  "JobName.$": "$.sample_id",
+                  "JobQueue": "arn:aws:batch:ap-northeast-2:901858906361:job-queue/CellSNP_Spot",
+                  "ContainerOverrides": {
+                    "Environment": [
+                      {
+                        "Name": "download_bucket",
+                        "Value.$": "$.download_bucket"
+                      },
+                      {
+                        "Name": "upload_bucket",
+                        "Value.$": "$.upload_bucket"
+                      },
+                      {
+                        "Name": "sample_id",
+                        "Value.$": "$.sample_id"
+                      },
+                      {
+                        "Name": "threads",
+                        "Value.$": "$.threads"
+                      },
+                      {
+                        "Name": "min_MAF",
+                        "Value.$": "$.min_MAF"
+                      },
+                      {
+                        "Name": "min_count",
+                        "Value.$": "$.min_count"
+                      },
+                      {
+                        "Name": "n_donor",
+                        "Value.$": "$.n_donor"
+                      }
+                    ]
+                  }
+                },
+                "Next": "filter_2"
+              },
+              "filter_2": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:ap-northeast-2:901858906361:function:vireoSNP",
+                "Next": "VireoSNP"
+              },
+              "VireoSNP": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::batch:submitJob.sync",
+                "Parameters": {
+                  "JobDefinition": "arn:aws:batch:ap-northeast-2:901858906361:job-definition/Vireosnp:4",
+                  "JobName.$": "$.sample_id",
+                  "JobQueue": "arn:aws:batch:ap-northeast-2:901858906361:job-queue/VireoSNP",
+                  "ContainerOverrides": {
+                    "Environment": [
+                      {
+                        "Name": "download_bucket",
+                        "Value.$": "$.download_bucket"
+                      },
+                      {
+                        "Name": "upload_bucket",
+                        "Value.$": "$.upload_bucket"
+                      },
+                      {
+                        "Name": "sample_id",
+                        "Value.$": "$.sample_id"
+                      },
+                      {
+                        "Name": "n_donor",
+                        "Value.$": "$.n_donor"
+                      }
+                    ]
+                  }
+                },
+                "End": true
+              }
+            }
+          },
+          {
+            "StartAt": "filter_3",
+            "States": {
+              "filter_3": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:ap-northeast-2:901858906361:function:Souporcell_filter",
+                "Next": "SPC"
+              },
+              "SPC": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::batch:submitJob.sync",
+                "Parameters": {
+                  "JobDefinition": "arn:aws:batch:ap-northeast-2:901858906361:job-definition/Souporcell:4",
+                  "JobName.$": "$.sample_id",
+                  "JobQueue": "arn:aws:batch:ap-northeast-2:901858906361:job-queue/SPC",
+                  "ContainerOverrides": {
+                    "Environment": [
+                      {
+                        "Name": "download_bucket",
+                        "Value.$": "$.download_bucket"
+                      },
+                      {
+                        "Name": "upload_bucket",
+                        "Value.$": "$.upload_bucket"
+                      },
+                      {
+                        "Name": "sample_id",
+                        "Value.$": "$.sample_id"
+                      },
+                      {
+                        "Name": "threads",
+                        "Value.$": "$.threads"
+                      },
+                      {
+                        "Name": "min_MAF",
+                        "Value.$": "$.min_MAF"
+                      },
+                      {
+                        "Name": "min_count",
+                        "Value.$": "$.min_count"
+                      },
+                      {
+                        "Name": "n_donor",
+                        "Value.$": "$.n_donor"
+                      }
+                    ]
+                  }
+                },
+                "End": true
+              }
+            }
+          }
+        ],
+        "End": true
+      }
+    }
+  }

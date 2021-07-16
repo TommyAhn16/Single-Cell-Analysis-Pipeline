@@ -1,5 +1,7 @@
 import os
 import boto3
+import subprocess
+import sys
 
 # Env variables
 download_bucket = os.environ['download_bucket']
@@ -14,23 +16,33 @@ sample_file_path = os.path.join(os.getcwd(), f"{sample_id}_samples")
 cellranger = "/opt/cellranger-5.0.1/cellranger"
 ref_file = "/home/ec2-user/refdata-gex-GRCh38-2020-A"
 
+# Function to run shell commands
+
+
+def run_command(cmd):
+    try:
+        subprocess.run(f'echo {cmd}', shell=True)
+        subprocess.run(cmd, shell=True, stderr=subprocess.PIPE, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Stderr: {e.stderr}")
+        sys.exit()
+
+
 # S3 client, resource
 s3_client = boto3.client('s3')
 s3_resource = boto3.resource('s3')
 
 # Download samples: AWS CLI
 cmd = f"aws s3 sync s3://{download_bucket}/{sample_id} {sample_file_path}"
-os.system(f"echo {cmd}")
-os.system(cmd)
+run_command(cmd)
 
 # chek if files are downloaded
-os.system(f"ls {sample_file_path}")
-os.system("df -h")
+subprocess.run(f"ls -lh {sample_file_path}")
+subprocess.run("df -h")
 
 # Run command
 cmd = f"{cellranger} count --id={sample_id} --fastqs={sample_file_path} --transcriptome={ref_file} --localcores={core} --localmem={memory} --expect-cells={expect_cells}"
-os.system(f"echo {cmd}")
-os.system(cmd)
+run_command(cmd)
 
 # Upload output files
 output_folder_path = os.path.join(os.getcwd(), sample_id)
@@ -80,7 +92,7 @@ for dirpath, dirnames, filenames in os.walk(counter_path):
             upload_obj(s3_resource, upload_bucket, json_path, json_key)
 
 # Clean up
-os.system("df -h")
-os.system(f"rm -rf {os.path.join(os.getcwd(),sample_id)}")
-os.system(f"rm -rf {sample_file_path}")
-os.system("df -h")
+subprocess.run("df -h", shell=True)
+subprocess.run(f"rm -rf {os.path.join(os.getcwd(),sample_id)}", shell=True)
+subprocess.run(f"rm -rf {sample_file_path}", shell=True)
+subprocess.run("df -h", shell=True)

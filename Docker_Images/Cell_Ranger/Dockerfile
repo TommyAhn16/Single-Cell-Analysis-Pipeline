@@ -10,6 +10,6 @@ RUN yum update -y && \
     yum install -y vim && \
     yum install -y tar && \
     yum install -y gzip && \
-    yum install -y python3 && \
+    yum install -y python3.7 && \
     pip3 install -r /home/ec2-user/requirements.txt && \
     chmod +x /home/ec2-user/command.sh
