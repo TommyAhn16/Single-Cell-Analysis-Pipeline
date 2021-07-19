@@ -1,0 +1,3 @@
+[submodule "Docker_Images/Souporcell/souporcell"]
+	path = Docker_Images/Souporcell/souporcell
+	url = https://github.com/wheaton5/souporcell.git
