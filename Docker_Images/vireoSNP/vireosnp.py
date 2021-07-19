@@ -24,6 +24,7 @@ def run_command(cmd):
 
 # Download files from CellSNP result
 cmd = f"aws s3 sync s3://{download_bucket}/{sample_id} ./{sample_id}_cellSNP"
+subprocess.run("echo '###### Downloading Input Files #######' ", shell=True)
 run_command(cmd)
 
 
@@ -31,6 +32,7 @@ run_command(cmd)
 cell_snp_path = os.path.join(os.getcwd(), f"{sample_id}_cellSNP")
 output_path = os.path.join(os.getcwd(), f"{sample_id}")
 cmd = f"vireo -c {cell_snp_path} -N {n_donor} -o {output_path}"
+subprocess.run("echo '###### Running Main Command #######' ", shell=True)
 run_command(cmd)
 
 # Upload output files
@@ -51,11 +53,11 @@ def upload_obj(s3_resource, bucket_name, path, key):
     print(f"{key} uploaded")
     return
 
-
+subprocess.run("echo '###### Uploading Result Files #######' ", shell=True)
 upload_obj(s3_resource, upload_bucket, output_path, sample_id)
 
 # Clean up
+subprocess.run("echo '###### Disk Volume Info #######' ", shell=True)
 subprocess.run("df -h", shell=True)
 subprocess.run(f"rm -rf {output_path}", shell=True)
 subprocess.run(f"rm -rf {cell_snp_path}", shell=True)
-subprocess.run("df -h", shell=True)
