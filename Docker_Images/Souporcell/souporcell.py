@@ -32,7 +32,9 @@ fasta_path = os.path.join(home_dir, os.path.join("fasta", "genome.fa"))
 
 # Download files
 cmd = f"aws s3 sync s3://{download_bucket}/{sample_id} {download_path}"
+subprocess.run("echo '###### Downloading Input Files #######' ", shell=True)
 run_command(cmd)
+subprocess.run("echo '###### Checking Free Disk Volume #######' ", shell=True)
 subprocess.run("df -h", shell=True)
 
 # Bam, barcode path
@@ -51,14 +53,16 @@ for dirpath, dirnames, filenames in os.walk(download_path):
 
 # Run main command
 cmd = f"souporcell_pipeline.py -i {bamfile_path} -b {barcode_path} -f {fasta_path} -t {threads} -o {output_dir} -k {num_clusters}"
+subprocess.run("echo '###### Running Main Command #######' ", shell=True)
 run_command(cmd)
 
 # Upload output files
-subprocess.run("df -h", shell=True)
 cmd = f"aws s3 sync {output_dir} s3://{upload_bucket}/{sample_id}"
+subprocess.run("echo '###### Uploading Result Files #######' ", shell=True)
 run_command(cmd)
 
 # Clean up
+subprocess.run("echo '###### Checking Free Disk Volume #######' ", shell=True)
+subprocess.run("df -h", shell=True)
 subprocess.run(f"rm -rf {output_dir}", shell=True)
 subprocess.run(f"rm -rf {download_path}", shell=True)
-subprocess.run("df -h", shell=True)
