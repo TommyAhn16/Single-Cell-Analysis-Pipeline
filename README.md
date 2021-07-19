@@ -16,5 +16,12 @@
 
 
 ### Souporcell
+- Anaconda Installers version: Python 3.8, Anaconda3-2021.05-Linux-x86_64
+- Fasta referance: cellranger 5.0.1 reference
+- minimap2: 2.7-r654
+- vartrix: 1.1.22
+- freebayes: 1.3.1-dirty
+- cargo: 1.53.0 (4369396ce 2021-04-27)
+
 
 
