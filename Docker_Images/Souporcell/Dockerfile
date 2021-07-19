@@ -12,6 +12,7 @@ RUN chmod +x ./command.sh && \
     yum install -y gzip && \
     yum install -y gcc && \
     yum install -y tar && \
+    yum install -y wget && \
     # Download referance fasta file
     curl -O https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2020-A.tar.gz && \
     tar -xzvf refdata-gex-GRCh38-2020-A.tar.gz && \
