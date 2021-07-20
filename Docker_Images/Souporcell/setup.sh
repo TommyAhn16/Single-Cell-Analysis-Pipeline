@@ -1,17 +1,4 @@
 #!/bin/bash
-# Install Souporcell repo
-git clone https://github.com/wheaton5/souporcell.git
-# Install Anaconda and packages
-source /root/anaconda3/etc/profile.d/conda.sh
-conda init bash
-conda env create -f /home/ec2-user/souporcell/souporcell_env.yaml
-conda activate souporcell
-conda install -y -c conda-forge awscli
-# Install Rust and compile
-curl https://sh.rustup.rs -sSf | sh -s -- -y
-source $HOME/.cargo/env
-cd /home/ec2-user/souporcell/souporcell && cargo build --release
-cd /home/ec2-user/souporcell/troublet && cargo build --release
 # Install additional tools
 cd /home/ec2-user
 mkdir tools
@@ -22,7 +9,7 @@ tar -xzvf v2.7.tar.gz
 cd minimap2-2.7
 make
 cd ..
-mv ./minimap2-2.7/minimap2 ./tools/.
+mv ./minimap2-2.7/minimap2 ./tools/minimap2
 rm -rf v2.7.tar.gz
 rm -rf minimap2-2.7
 # bedtools2 installation
@@ -37,3 +24,16 @@ chmod 777 ./tools/freebayes
 wget https://github.com/10XGenomics/vartrix/releases/download/v1.1.22/vartrix_linux
 mv vartrix_linux ./tools/vartrix
 chmod 777 ./tools/vartrix
+# Install Souporcell repo
+git clone https://github.com/wheaton5/souporcell.git
+# Install Anaconda and packages
+source /root/anaconda3/etc/profile.d/conda.sh
+conda init bash
+conda env create -f /home/ec2-user/souporcell/souporcell_env.yaml
+conda activate souporcell
+conda install -y -c conda-forge awscli
+# Install Rust and compile
+curl https://sh.rustup.rs -sSf | sh -s -- -y
+source $HOME/.cargo/env
+cd /home/ec2-user/souporcell/souporcell && cargo build --release
+cd /home/ec2-user/souporcell/troublet && cargo build --release

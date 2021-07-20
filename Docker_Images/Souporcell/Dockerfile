@@ -10,7 +10,7 @@ RUN chmod +x ./command.sh && \
     yum update -y && \
     yum install -y vim && \
     yum install -y gzip && \
-    yum install -y gcc && \
+    yum install -y gcc gcc-c++ kernel-devel make && \
     yum install -y tar && \
     yum install -y wget && \
     yum install -y git && \
