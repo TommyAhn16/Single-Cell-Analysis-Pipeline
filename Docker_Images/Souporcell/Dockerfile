@@ -6,7 +6,7 @@ RUN chmod +x ./command.sh && \
     # Install Anaconda 3 (2021.05)
     curl -O https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh && \
     bash Anaconda3-2021.05-Linux-x86_64.sh -b && \
-    # Install packages for linux os
+    # Install packages for Linux os
     yum update -y && \
     yum install -y vim && \
     yum install -y gzip && \

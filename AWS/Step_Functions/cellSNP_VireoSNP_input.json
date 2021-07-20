@@ -1,5 +1,5 @@
 {
-    "sample_id": "21_01206_LI_SING",
+    "sample_id": "21_00170_LI_SING",
     "download_bucket": "cellranger-result-bucket",
     "upload_bucket": "cellsnp-original-result",
     "threads": "22",
