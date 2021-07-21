@@ -2,7 +2,7 @@ FROM amazonlinux:2
 WORKDIR /home/ec2-user
 COPY . .
 RUN chmod +x ./command.sh && \
-    # Install packages for linux os
+    # Install packages for Linux os
     yum update -y && \
     yum install -y vim && \
     yum install -y gzip && \

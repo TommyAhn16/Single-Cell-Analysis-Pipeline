@@ -34,19 +34,20 @@ s3_resource = boto3.resource('s3')
 
 # Download samples: AWS CLI
 cmd = f"aws s3 sync s3://{download_bucket}/{sample_id} {sample_file_path}"
+subprocess.run("echo '###### Downloading Input Files #######' ", shell=True)
 run_command(cmd)
+subprocess.run("echo '###### Checking Free Disk Volume #######' ", shell=True)
+subprocess.run("df -h", shell=True)
 
-# chek if files are downloaded
-subprocess.run(f"ls -lh {sample_file_path}")
-subprocess.run("df -h")
-
-# Run command
+# Run main command
 cmd = f"{cellranger} count --id={sample_id} --fastqs={sample_file_path} --transcriptome={ref_file} --localcores={core} --localmem={memory} --expect-cells={expect_cells}"
+subprocess.run("echo '###### Running Main Command #######' ", shell=True)
 run_command(cmd)
 
 # Upload output files
 output_folder_path = os.path.join(os.getcwd(), sample_id)
 files = os.listdir(output_folder_path)
+subprocess.run("echo '###### Uploading Result Files #######' ", shell=True)
 
 # Upload function
 
@@ -92,7 +93,7 @@ for dirpath, dirnames, filenames in os.walk(counter_path):
             upload_obj(s3_resource, upload_bucket, json_path, json_key)
 
 # Clean up
+subprocess.run("echo '###### Checking Free Disk Volume #######' ", shell=True)
 subprocess.run("df -h", shell=True)
 subprocess.run(f"rm -rf {os.path.join(os.getcwd(),sample_id)}", shell=True)
 subprocess.run(f"rm -rf {sample_file_path}", shell=True)
-subprocess.run("df -h", shell=True)
