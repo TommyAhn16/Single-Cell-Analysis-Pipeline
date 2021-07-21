@@ -1,5 +1,8 @@
 {
-    "sample_id": "21_00170_LI_SING",
+    "AWS_KEY" : "AKIA5D6X22D42NHKFCDC",
+    "AWS_SECRET_KEY": "GNrWw4iOnFZPFlRLkFuXu26XEyml6L389Qu4Yh5h",
+    "REGION": "ap-northeast-2",
+    "sample_id": "21_01211_LI_SING",
     "download_bucket": "cellranger-result-bucket",
     "upload_bucket": "cellsnp-original-result",
     "threads": "22",
