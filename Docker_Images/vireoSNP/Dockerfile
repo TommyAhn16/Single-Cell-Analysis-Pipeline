@@ -1,14 +1,15 @@
 FROM amazonlinux:2
 WORKDIR /home/ec2-user
 COPY . .
-RUN yum update -y && \
+RUN \
     # Install packages for linux os
+    yum update -y && \
     yum install -y vim && \
     yum install -y gzip && \
     yum install -y unzip && \
-    # Download Python and packages
+    # Download Python and dependencies
     yum install -y python3.7 && \
-    pip3 install -r requirements.txt && \
+    pip3 install --no-cache-dir -r requirements.txt && \
     # Make script executable
     chmod +x ./command.sh && \
     # Download AWS CLI 2 (latest version)

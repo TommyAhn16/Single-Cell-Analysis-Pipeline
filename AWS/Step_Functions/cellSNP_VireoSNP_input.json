@@ -1,9 +1,12 @@
 {
-    "sample_id": "21_00170_LI_SING",
+    "AWS_KEY": "AKIA5D6X22D42NHKFCDC",
+    "AWS_SECRET_KEY": "GNrWw4iOnFZPFlRLkFuXu26XEyml6L389Qu4Yh5h",
+    "REGION": "ap-northeast-2",
+    "sample_id": "SCP9-GEX",
     "download_bucket": "cellranger-result-bucket",
     "upload_bucket": "cellsnp-original-result",
     "threads": "22",
     "min_MAF": "0.1",
     "min_count": "100",
     "n_donor": "4"
-}
+  }

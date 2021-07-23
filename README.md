@@ -5,15 +5,19 @@
 ### Cell Ranger
 - Version: 5.0.1
 - [10x genomics reference page](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/5.0/what-is-cell-ranger)
+- Main command: ``cellranger count`` 
+- Takes FASTQ files and performs alignment, filtering, barcode counting, and UMI counting. 
+- It uses the Chromium cellular barcodes to generate feature-barcode matrices, determine clusters, and perform gene expression analysis
 
 ### cellSNP
 - Version: 0.3.2
 - [source code](https://github.com/single-cell-genetics/cellSNP)
+- pileup whole chromosome(s) for a single BAM/SAM file
 
 ### vireoSNP
 - Version: 0.5.0
 - [vireoSNP documentation reference](https://vireosnp.readthedocs.io/en/latest/index.html)
-
+- Vireo is primarily designed for demultiplexing cells into donors by modelling of expressed alleles
 
 ### Souporcell
 - Anaconda Installers version: Python 3.8, Anaconda3-2021.05-Linux-x86_64

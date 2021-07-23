@@ -2,7 +2,7 @@
     "AWS_KEY" : "AKIA5D6X22D42NHKFCDC",
     "AWS_SECRET_KEY": "GNrWw4iOnFZPFlRLkFuXu26XEyml6L389Qu4Yh5h",
     "REGION": "ap-northeast-2",
-    "sample_id": "21_01211_LI_SING",
+    "sample_id": "SCP17-GEX",
     "download_bucket": "cellranger-input-bucket",
     "upload_bucket": "cellranger-result-bucket",
     "core": "4",
@@ -12,5 +12,6 @@
     "SPC_threads" : "4",
     "min_MAF": "0.1",
     "min_count": "100",
-    "n_donor": "4"
+    "n_donor": "4",
+    "num_clusters" : "4"
 }
