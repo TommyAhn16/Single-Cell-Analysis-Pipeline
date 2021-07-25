@@ -21,7 +21,7 @@ RUN chmod +x ./command.sh && \
     conda config --add channels conda-forge && \
     conda create -n CSP cellsnp-lite && \
     conda activate CSP && \
-    conda install python=3.7 && \
+    conda install -y python=3.7 && \
     # Clean up
     rm -rf ./awscliv2.zip && \
     rm -rf ./Anaconda3-2021.05-Linux-x86_64.sh && \
