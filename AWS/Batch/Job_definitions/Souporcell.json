@@ -1,0 +1,47 @@
+{
+    "jobDefinitionName": "Souporcell",
+    "type": "container",
+    "retryStrategy": {
+        "attempts": 3
+    },
+    "containerProperties": {
+        "image": "901858906361.dkr.ecr.ap-northeast-2.amazonaws.com/souporcell:0.1.1",
+        "command": [
+            "bash",
+            "command.sh"
+        ],
+        "volumes": [
+            {
+                "host": {
+                    "sourcePath": "/vol_mnt"
+                },
+                "name": "volume1"
+            }
+        ],
+        "mountPoints": [
+            {
+                "containerPath": "/home/ec2-user/vol_mnt",
+                "sourceVolume": "volume1"
+            }
+        ],
+        "readonlyRootFilesystem": false,
+        "privileged": false,
+        "resourceRequirements": [
+            {
+                "value": "32",
+                "type": "VCPU"
+            },
+            {
+                "value": "61440",
+                "type": "MEMORY"
+            }
+        ]
+    },
+    "timeout": {
+        "attemptDurationSeconds": 1296000
+    },
+    "propagateTags": false,
+    "platformCapabilities": [
+        "EC2"
+    ]
+}

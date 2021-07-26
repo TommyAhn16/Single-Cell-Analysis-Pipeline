@@ -1,0 +1,33 @@
+{
+    "jobDefinitionName": "VireoSNP",
+    "type": "container",
+    "retryStrategy": {
+        "attempts": 3
+    },
+    "containerProperties": {
+        "image": "901858906361.dkr.ecr.ap-northeast-2.amazonaws.com/vireosnp:0.1",
+        "command": [
+            "bash",
+            "command.sh"
+        ],
+        "readonlyRootFilesystem": false,
+        "privileged": false,
+        "resourceRequirements": [
+            {
+                "value": "8",
+                "type": "VCPU"
+            },
+            {
+                "value": "15360",
+                "type": "MEMORY"
+            }
+        ]
+    },
+    "timeout": {
+        "attemptDurationSeconds": 86400
+    },
+    "propagateTags": false,
+    "platformCapabilities": [
+        "EC2"
+    ]
+}

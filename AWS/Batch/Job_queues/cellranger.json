@@ -1,0 +1,11 @@
+{
+    "jobQueueName": "Cellranger",
+    "state": "ENABLED",
+    "priority": 1,
+    "computeEnvironmentOrder": [
+      {
+        "order": 1,
+        "computeEnvironment": "500GB_gp3_spot"
+      }
+    ]
+}

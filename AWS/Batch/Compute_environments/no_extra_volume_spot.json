@@ -1,5 +1,5 @@
 {
-    "computeEnvironmentName": "2TB_st1_spot",
+    "computeEnvironmentName": "no_extra_volume_spot",
     "type": "MANAGED",
     "state": "ENABLED",
     "computeResources": {
@@ -27,10 +27,6 @@
         ],
         "ec2KeyPair": "Batch_Key",
         "instanceRole": "ecsInstanceRole",
-        "bidPercentage": 100,
-        "launchTemplate": {
-            "launchTemplateName": "2TB_st1",
-            "version": "1"
-        }
+        "bidPercentage": 100
     }
 }
