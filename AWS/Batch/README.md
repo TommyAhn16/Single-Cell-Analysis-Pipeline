@@ -4,11 +4,11 @@
 [AWS CLI Doc](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/batch/create-compute-environment.html)
 ### Command
 ```Bash
-aws batch create-compute-environment --cli-input-json file://<json file>
+$ aws batch create-compute-environment --cli-input-json file://<json file>
 ```
 ### Example
 ```Bash
-aws batch create-compute-environment --cli-input-json file://500GB_gp3_spot.json
+$ aws batch create-compute-environment --cli-input-json file://500GB_gp3_spot.json
 ```
 ### Notes
 - Should have all [launch templates](../EC2/README.md) created before attempting to create compute environments
@@ -18,11 +18,11 @@ aws batch create-compute-environment --cli-input-json file://500GB_gp3_spot.json
 [AWS CLI Doc](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/batch/register-job-definition.html)
 ### Command
 ```Bash
-aws batch register-job-definition --cli-input-json file://<json file>
+$ aws batch register-job-definition --cli-input-json file://<json file>
 ```
 ### Example
 ```Bash
-aws batch register-job-definition --cli-input-json file://cellranger.json
+$ aws batch register-job-definition --cli-input-json file://cellranger.json
 ```
 ### Notes
 - Replace `image` with one's own docker image in AWS ECR(Elastic Container Registry)
@@ -31,11 +31,11 @@ aws batch register-job-definition --cli-input-json file://cellranger.json
 [AWS CLI Doc](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/batch/create-job-queue.html)
 ### Command
 ```Bash
-aws batch create-job-queue --cli-input-json file://<json file>
+$ aws batch create-job-queue --cli-input-json file://<json file>
 ```
 ### Example
 ```Bash
-aws batch create-job-queue --cli-input-json file://cellranger.json
+$ aws batch create-job-queue --cli-input-json file://cellranger.json
 ```
 ### Notes
 - Should have all **compute environments** created before hand
