@@ -25,7 +25,7 @@ aws batch register-job-definition --cli-input-json file://<json file>
 aws batch register-job-definition --cli-input-json file://cellranger.json
 ```
 ### Notes
-- Replace `image` with one's own docker image in ECR
+- Replace `image` with one's own docker image in AWS ECR(Elastic Container Registry)
 ---
 ## Job Queues
 [AWS CLI Doc](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/batch/create-job-queue.html)
