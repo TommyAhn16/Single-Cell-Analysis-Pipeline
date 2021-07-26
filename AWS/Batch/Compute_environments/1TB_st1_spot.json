@@ -1,0 +1,36 @@
+{
+    "computeEnvironmentName": "1TB_st1_spot",
+    "type": "MANAGED",
+    "state": "ENABLED",
+    "computeResources": {
+        "type": "SPOT",
+        "allocationStrategy": "SPOT_CAPACITY_OPTIMIZED",
+        "minvCpus": 0,
+        "maxvCpus": 512,
+        "desiredvCpus": 0,
+        "instanceTypes": [
+            "c5.2xlarge",
+            "c5a.2xlarge",
+            "c5.4xlarge",
+            "c5a.4xlarge",
+            "c5a.8xlarge",
+            "c5.9xlarge"
+        ],
+        "subnets": [
+            "subnet-cc268fa7",
+            "subnet-861288fd",
+            "subnet-16fee35a",
+            "subnet-0c937d53"
+        ],
+        "securityGroupIds": [
+            "sg-063cd2885184d83b4"
+        ],
+        "ec2KeyPair": "Batch_Key",
+        "instanceRole": "ecsInstanceRole",
+        "bidPercentage": 100,
+        "launchTemplate": {
+            "launchTemplateName": "1TB_st1",
+            "version": "1"
+        }
+    }
+}
