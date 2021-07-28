@@ -1,16 +1,15 @@
----
 Parameters:
   PipelineName:
     Type: String
     Description: Name of the pipeline (e.g. SC_pipeline)
   Subnets:
-    Type: List<AWS::EC2::Subnet::Id>
+    Type: 'List<AWS::EC2::Subnet::Id>'
     Description: Subnets to use for Batch compute environment
   VPC:
-    Type: AWS::EC2::VPC::Id
+    Type: 'AWS::EC2::VPC::Id'
     Description: VPC ID for the pipeline (e.g. vpc-a123baa3)
   KeyPair:
-    Type: AWS::EC2::KeyPair::KeyName
+    Type: 'AWS::EC2::KeyPair::KeyName'
     Description: Name of the EC2 keypair which will be used in the pipeline
   CellrangerImage:
     Type: String
@@ -35,442 +34,323 @@ Parameters:
     Description: S3 Bucket name of where Lambda codes are saved
 Resources:
   LambdaRole:
-    Type: AWS::IAM::Role
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: lambda.amazonaws.com
-          Action: sts:AssumeRole
-      RoleName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - LambdaRole
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      RoleName: !Join [ "_", [ !Ref PipelineName, LambdaRole] ]
   BatchServiceLinkedRole:
-    Type: AWS::IAM::Role
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: batch.amazonaws.com
-          Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service: batch.amazonaws.com
+            Action: 'sts:AssumeRole'
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
-      RoleName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - BatchServiceLinkedRole
+        - 'arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole'
+      RoleName: !Join [ "_", [ !Ref PipelineName, BatchServiceLinkedRole] ]
   ECSInstanceRole:
-    Type: AWS::IAM::Role
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: ec2.amazonaws.com
-          Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
-      RoleName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - ECSInstanceRole
+        - >-
+          arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+      RoleName: !Join [ "_", [ !Ref PipelineName, ECSInstanceRole] ]
   ECSInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
+    Type: 'AWS::IAM::InstanceProfile'
     Properties:
-      InstanceProfileName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - BatchInstance
-      Path: "/"
+      InstanceProfileName: !Join [ "_", [ !Ref PipelineName, BatchInstance] ] 
+      Path: /
       Roles:
-      - Ref: ECSInstanceRole
+        - !Ref ECSInstanceRole
   StepFunctionsRole:
-    Type: AWS::IAM::Role
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
-        - Sid: ''
-          Effect: Allow
-          Principal:
-            Service: states.amazonaws.com
-          Action: sts:AssumeRole
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: 'sts:AssumeRole'
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
-      RoleName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - StepFunctionsRole
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaRole'
+      RoleName: !Join [ "_", [ !Ref PipelineName, StepFunctionsRole] ] 
       Policies:
-      - PolicyName: BatchSync
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-            - batch:SubmitJob
-            - batch:DescribeJobs
-            - batch:TerminateJob
-            Resource: "*"
-          - Effect: Allow
-            Action:
-            - events:PutTargets
-            - events:PutRule
-            - events:DescribeRule
-            Resource:
-            - "*"
+        - PolicyName: BatchSync
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'batch:SubmitJob'
+                  - 'batch:DescribeJobs'
+                  - 'batch:TerminateJob'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'events:PutTargets'
+                  - 'events:PutRule'
+                  - 'events:DescribeRule'
+                Resource:
+                  - '*'
   BatchSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+    Type: 'AWS::EC2::SecurityGroup'
     Properties:
-      GroupDescription: Security group for compute resources that AWS Batch job would
-        initiate
-      GroupName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - BatchSecurityGroup
+      GroupDescription: Security group for compute resources that AWS Batch job would initiate
+      GroupName: !Join [ "_", [ !Ref PipelineName, BatchSecurityGroup] ] 
       SecurityGroupEgress:
-      - CidrIp: 0.0.0.0/0
-        IpProtocol: -1
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
       SecurityGroupIngress:
-      - CidrIp: 0.0.0.0/0
-        IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-      - CidrIp: 0.0.0.0/0
-        IpProtocol: tcp
-        FromPort: 2049
-        ToPort: 2049
-      VpcId:
-        Ref: VPC
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+      VpcId: !Ref VPC
   500GBgp3LaunchTemplate:
-    Type: AWS::EC2::LaunchTemplate
+    Type: 'AWS::EC2::LaunchTemplate'
     Properties:
       LaunchTemplateData:
         BlockDeviceMappings:
-        - DeviceName: "/dev/xvda"
-          Ebs:
-            DeleteOnTermination: true
-            VolumeSize: 50
-            VolumeType: gp3
-        - DeviceName: "/dev/xvdb"
-          Ebs:
-            DeleteOnTermination: true
-            VolumeSize: 500
-            VolumeType: gp3
-        UserData: TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
-      LaunchTemplateName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - 500GB_gp3
+          - DeviceName: /dev/xvda
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: 50
+              VolumeType: gp3
+          - DeviceName: /dev/xvdb
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: 500
+              VolumeType: gp3
+        UserData: >-
+          TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
+      LaunchTemplateName: !Join [ "_", [ !Ref PipelineName, 500GB_gp3] ] 
   1TBgp3LaunchTemplate:
-    Type: AWS::EC2::LaunchTemplate
+    Type: 'AWS::EC2::LaunchTemplate'
     Properties:
       LaunchTemplateData:
         BlockDeviceMappings:
-        - DeviceName: "/dev/xvda"
-          Ebs:
-            DeleteOnTermination: true
-            VolumeSize: 50
-            VolumeType: gp3
-        - DeviceName: "/dev/xvdb"
-          Ebs:
-            DeleteOnTermination: true
-            VolumeSize: 1000
-            VolumeType: gp3
-        UserData: TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
-      LaunchTemplateName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - 1TB_gp3
+          - DeviceName: /dev/xvda
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: 50
+              VolumeType: gp3
+          - DeviceName: /dev/xvdb
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: 1000
+              VolumeType: gp3
+        UserData: >-
+          TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
+      LaunchTemplateName: !Join [ "_", [ !Ref PipelineName, 1TB_gp3] ]
   1TBst1LaunchTemplate:
-    Type: AWS::EC2::LaunchTemplate
+    Type: 'AWS::EC2::LaunchTemplate'
     Properties:
       LaunchTemplateData:
         BlockDeviceMappings:
-        - DeviceName: "/dev/xvda"
-          Ebs:
-            DeleteOnTermination: true
-            VolumeSize: 50
-            VolumeType: gp3
-        - DeviceName: "/dev/xvdb"
-          Ebs:
-            DeleteOnTermination: true
-            VolumeSize: 1000
-            VolumeType: st1
-        UserData: TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
-      LaunchTemplateName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - 1TB_st1
+          - DeviceName: /dev/xvda
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: 50
+              VolumeType: gp3
+          - DeviceName: /dev/xvdb
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: 1000
+              VolumeType: st1
+        UserData: >-
+          TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
+      LaunchTemplateName: !Join [ "_", [ !Ref PipelineName, 1TB_st1] ]
   500GBgp3ComputeEnv:
-    Type: AWS::Batch::ComputeEnvironment
+    Type: 'AWS::Batch::ComputeEnvironment'
     Properties:
-      ComputeEnvironmentName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - 500GB_gp3_spot
+      ComputeEnvironmentName: !Join [ "_", [ !Ref PipelineName, 500GB_gp3_spot] ]
       Type: MANAGED
       State: ENABLED
-      ServiceRole:
-        Fn::GetAtt:
-        - BatchServiceLinkedRole
-        - Arn
+      ServiceRole: !GetAtt BatchServiceLinkedRole.Arn
       ComputeResources:
         Type: SPOT
         AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
         BidPercentage: 100
-        Ec2KeyPair:
-          Ref: KeyPair
-        InstanceRole:
-          Ref: ECSInstanceProfile
+        Ec2KeyPair: !Ref KeyPair
+        InstanceRole: !Ref ECSInstanceProfile
         InstanceTypes:
-        - c5.2xlarge
-        - c5a.2xlarge
-        - c5.4xlarge
-        - c5a.4xlarge
-        - c5a.8xlarge
-        - c5.9xlarge
+          - c5.2xlarge
+          - c5a.2xlarge
+          - c5.4xlarge
+          - c5a.4xlarge
+          - c5a.8xlarge
+          - c5.9xlarge
         LaunchTemplate:
-          LaunchTemplateId:
-            Ref: 500GBgp3LaunchTemplate
-          Version:
-            Fn::GetAtt:
-            - 500GBgp3LaunchTemplate
-            - LatestVersionNumber
+          LaunchTemplateId: !Ref 500GBgp3LaunchTemplate
+          Version: !GetAtt 500GBgp3LaunchTemplate.LatestVersionNumber
         MaxvCpus: 512
         MinvCpus: 0
-        SecurityGroupIds:
-        - Fn::GetAtt:
-          - BatchSecurityGroup
-          - GroupId
-        Subnets:
-          Ref: Subnets
+        SecurityGroupIds: 
+          - !GetAtt BatchSecurityGroup.GroupId
+        Subnets: !Ref Subnets
   1TBgp3ComputeEnv:
-    Type: AWS::Batch::ComputeEnvironment
+    Type: 'AWS::Batch::ComputeEnvironment'
     Properties:
-      ComputeEnvironmentName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - 1TB_gp3_spot
+      ComputeEnvironmentName: !Join [ "_", [ !Ref PipelineName, 1TB_gp3_spot] ]
       Type: MANAGED
       State: ENABLED
-      ServiceRole:
-        Fn::GetAtt:
-        - BatchServiceLinkedRole
-        - Arn
+      ServiceRole: !GetAtt BatchServiceLinkedRole.Arn
       ComputeResources:
         Type: SPOT
         AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
         BidPercentage: 100
-        Ec2KeyPair:
-          Ref: KeyPair
-        InstanceRole:
-          Ref: ECSInstanceProfile
+        Ec2KeyPair: !Ref KeyPair
+        InstanceRole: !Ref ECSInstanceProfile
         InstanceTypes:
-        - c5.2xlarge
-        - c5a.2xlarge
-        - c5.4xlarge
-        - c5a.4xlarge
-        - c5a.8xlarge
-        - c5.9xlarge
+          - c5.2xlarge
+          - c5a.2xlarge
+          - c5.4xlarge
+          - c5a.4xlarge
+          - c5a.8xlarge
+          - c5.9xlarge
         LaunchTemplate:
-          LaunchTemplateId:
-            Ref: 1TBgp3LaunchTemplate
-          Version:
-            Fn::GetAtt:
-            - 1TBgp3LaunchTemplate
-            - LatestVersionNumber
+          LaunchTemplateId: !Ref 1TBgp3LaunchTemplate
+          Version: !GetAtt 1TBgp3LaunchTemplate.LatestVersionNumber
         MaxvCpus: 512
         MinvCpus: 0
-        SecurityGroupIds:
-        - Fn::GetAtt:
-          - BatchSecurityGroup
-          - GroupId
-        Subnets:
-          Ref: Subnets
+        SecurityGroupIds: 
+          - !GetAtt BatchSecurityGroup.GroupId
+        Subnets: !Ref Subnets
   1TBst1ComputeEnv:
-    Type: AWS::Batch::ComputeEnvironment
+    Type: 'AWS::Batch::ComputeEnvironment'
     Properties:
-      ComputeEnvironmentName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - 1TB_st1_spot
+      ComputeEnvironmentName: !Join [ "_", [ !Ref PipelineName, 1TB_st1_spot] ] 
       Type: MANAGED
       State: ENABLED
-      ServiceRole:
-        Fn::GetAtt:
-        - BatchServiceLinkedRole
-        - Arn
+      ServiceRole: !GetAtt BatchServiceLinkedRole.Arn
       ComputeResources:
         Type: SPOT
         AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
         BidPercentage: 100
-        Ec2KeyPair:
-          Ref: KeyPair
-        InstanceRole:
-          Ref: ECSInstanceProfile
+        Ec2KeyPair: !Ref KeyPair
+        InstanceRole: !Ref ECSInstanceProfile
         InstanceTypes:
-        - c5.2xlarge
-        - c5a.2xlarge
-        - c5.4xlarge
-        - c5a.4xlarge
-        - c5a.8xlarge
-        - c5.9xlarge
+          - c5.2xlarge
+          - c5a.2xlarge
+          - c5.4xlarge
+          - c5a.4xlarge
+          - c5a.8xlarge
+          - c5.9xlarge
         LaunchTemplate:
-          LaunchTemplateId:
-            Ref: 1TBst1LaunchTemplate
-          Version:
-            Fn::GetAtt:
-            - 1TBst1LaunchTemplate
-            - LatestVersionNumber
+          LaunchTemplateId: !Ref 1TBst1LaunchTemplate
+          Version: !GetAtt 1TBst1LaunchTemplate.LatestVersionNumber
         MaxvCpus: 512
         MinvCpus: 0
-        SecurityGroupIds:
-        - Fn::GetAtt:
-          - BatchSecurityGroup
-          - GroupId
-        Subnets:
-          Ref: Subnets
+        SecurityGroupIds: 
+          - !GetAtt BatchSecurityGroup.GroupId
+        Subnets: !Ref Subnets
   DefaultComputeEnv:
-    Type: AWS::Batch::ComputeEnvironment
+    Type: 'AWS::Batch::ComputeEnvironment'
     Properties:
-      ComputeEnvironmentName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - default_spot
+      ComputeEnvironmentName: !Join [ "_", [ !Ref PipelineName, default_spot] ] 
       Type: MANAGED
       State: ENABLED
-      ServiceRole:
-        Fn::GetAtt:
-        - BatchServiceLinkedRole
-        - Arn
+      ServiceRole: !GetAtt BatchServiceLinkedRole.Arn
       ComputeResources:
         Type: SPOT
         AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
         BidPercentage: 100
-        Ec2KeyPair:
-          Ref: KeyPair
-        InstanceRole:
-          Ref: ECSInstanceProfile
+        Ec2KeyPair: !Ref KeyPair
+        InstanceRole: !Ref ECSInstanceProfile
         InstanceTypes:
-        - c5.2xlarge
-        - c5a.2xlarge
-        - c5.4xlarge
-        - c5a.4xlarge
+          - c5.2xlarge
+          - c5a.2xlarge
+          - c5.4xlarge
+          - c5a.4xlarge
         MaxvCpus: 512
         MinvCpus: 0
-        SecurityGroupIds:
-        - Fn::GetAtt:
-          - BatchSecurityGroup
-          - GroupId
-        Subnets:
-          Ref: Subnets
+        SecurityGroupIds: 
+          - !GetAtt BatchSecurityGroup.GroupId
+        Subnets: !Ref Subnets
   CellrangerJobQueue:
-    Type: AWS::Batch::JobQueue
+    Type: 'AWS::Batch::JobQueue'
     Properties:
       ComputeEnvironmentOrder:
-      - ComputeEnvironment:
-          Ref: 1TBgp3ComputeEnv
-        Order: 1
-      JobQueueName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - Cellranger
+        - ComputeEnvironment: !Ref 1TBgp3ComputeEnv
+          Order: 1
+      JobQueueName: !Join [ "_", [ !Ref PipelineName, Cellranger] ] 
       Priority: 1
       State: ENABLED
   cellSNPJobQueue:
-    Type: AWS::Batch::JobQueue
+    Type: 'AWS::Batch::JobQueue'
     Properties:
       ComputeEnvironmentOrder:
-      - ComputeEnvironment:
-          Ref: 500GBgp3ComputeEnv
-        Order: 1
-      JobQueueName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - cellSNP
+        - ComputeEnvironment: !Ref 500GBgp3ComputeEnv
+          Order: 1
+      JobQueueName: !Join [ "_", [ !Ref PipelineName, cellSNP] ]  
       Priority: 1
       State: ENABLED
   SPCJobQueue:
-    Type: AWS::Batch::JobQueue
+    Type: 'AWS::Batch::JobQueue'
     Properties:
       ComputeEnvironmentOrder:
-      - ComputeEnvironment:
-          Ref: 1TBst1ComputeEnv
-        Order: 1
-      JobQueueName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - SPC
+        - ComputeEnvironment: !Ref 1TBst1ComputeEnv
+          Order: 1
+      JobQueueName: !Join [ "_", [ !Ref PipelineName, SPC] ]
       Priority: 1
       State: ENABLED
   vireoSNPJobQueue:
-    Type: AWS::Batch::JobQueue
+    Type: 'AWS::Batch::JobQueue'
     Properties:
       ComputeEnvironmentOrder:
-      - ComputeEnvironment:
-          Ref: DefaultComputeEnv
-        Order: 1
-      JobQueueName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - vireoSNP
+        - ComputeEnvironment: !Ref DefaultComputeEnv
+          Order: 1
+      JobQueueName: !Join [ "_", [ !Ref PipelineName, vireoSNP] ]
       Priority: 1
       State: ENABLED
   CellrangerJobDef:
-    Type: AWS::Batch::JobDefinition
+    Type: 'AWS::Batch::JobDefinition'
     Properties:
       ContainerProperties:
-        Image:
-          Ref: CellrangerImage
+        Image: !Ref CellrangerImage
         Command:
-        - bash
-        - command.sh
+          - bash
+          - command.sh
         Volumes:
-        - Host:
-            SourcePath: "/vol_mnt"
-          Name: volume1
+          - Host:
+              SourcePath: /vol_mnt
+            Name: volume1
         MountPoints:
-        - ContainerPath: "/home/ec2-user/vol_mnt"
-          SourceVolume: volume1
-          ReadOnly: false
+          - ContainerPath: /home/ec2-user/vol_mnt
+            SourceVolume: volume1
+            ReadOnly: false
         ReadonlyRootFilesystem: false
         Privileged: false
         ResourceRequirements:
-        - Value: '32'
-          Type: VCPU
-        - Value: '61440'
-          Type: MEMORY
-      JobDefinitionName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - Cellranger_def
+          - Value: '32'
+            Type: VCPU
+          - Value: '61440'
+            Type: MEMORY
+      JobDefinitionName: !Join [ "_", [ !Ref PipelineName, Cellranger_def] ]
       PlatformCapabilities:
-      - EC2
+        - EC2
       PropagateTags: false
       RetryStrategy:
         Attempts: 5
@@ -478,36 +358,31 @@ Resources:
         AttemptDurationSeconds: 1296000
       Type: container
   cellSNPJobDef:
-    Type: AWS::Batch::JobDefinition
+    Type: 'AWS::Batch::JobDefinition'
     Properties:
       ContainerProperties:
-        Image:
-          Ref: cellSNPImage
+        Image: !Ref cellSNPImage
         Command:
-        - bash
-        - command.sh
+          - bash
+          - command.sh
         Volumes:
-        - Host:
-            SourcePath: "/vol_mnt"
-          Name: volume1
+          - Host:
+              SourcePath: /vol_mnt
+            Name: volume1
         MountPoints:
-        - ContainerPath: "/home/ec2-user/vol_mnt"
-          SourceVolume: volume1
-          ReadOnly: false
+          - ContainerPath: /home/ec2-user/vol_mnt
+            SourceVolume: volume1
+            ReadOnly: false
         ReadonlyRootFilesystem: false
         Privileged: false
         ResourceRequirements:
-        - Value: '32'
-          Type: VCPU
-        - Value: '61440'
-          Type: MEMORY
-      JobDefinitionName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - cellSNP_def
+          - Value: '32'
+            Type: VCPU
+          - Value: '61440'
+            Type: MEMORY
+      JobDefinitionName: !Join [ "_", [ !Ref PipelineName, cellSNP_def] ] 
       PlatformCapabilities:
-      - EC2
+        - EC2
       PropagateTags: false
       RetryStrategy:
         Attempts: 5
@@ -515,36 +390,31 @@ Resources:
         AttemptDurationSeconds: 1296000
       Type: container
   SPCJobDef:
-    Type: AWS::Batch::JobDefinition
+    Type: 'AWS::Batch::JobDefinition'
     Properties:
       ContainerProperties:
-        Image:
-          Ref: SPCImage
+        Image: !Ref SPCImage
         Command:
-        - bash
-        - command.sh
+          - bash
+          - command.sh
         Volumes:
-        - Host:
-            SourcePath: "/vol_mnt"
-          Name: volume1
+          - Host:
+              SourcePath: /vol_mnt
+            Name: volume1
         MountPoints:
-        - ContainerPath: "/home/ec2-user/vol_mnt"
-          SourceVolume: volume1
-          ReadOnly: false
+          - ContainerPath: /home/ec2-user/vol_mnt
+            SourceVolume: volume1
+            ReadOnly: false
         ReadonlyRootFilesystem: false
         Privileged: false
         ResourceRequirements:
-        - Value: '32'
-          Type: VCPU
-        - Value: '61440'
-          Type: MEMORY
-      JobDefinitionName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - SPC_def
+          - Value: '32'
+            Type: VCPU
+          - Value: '61440'
+            Type: MEMORY
+      JobDefinitionName: !Join [ "_", [ !Ref PipelineName, SPC_def] ]
       PlatformCapabilities:
-      - EC2
+        - EC2
       PropagateTags: false
       RetryStrategy:
         Attempts: 5
@@ -552,28 +422,23 @@ Resources:
         AttemptDurationSeconds: 1296000
       Type: container
   vireoSNPJobDef:
-    Type: AWS::Batch::JobDefinition
+    Type: 'AWS::Batch::JobDefinition'
     Properties:
       ContainerProperties:
-        Image:
-          Ref: vireoSNPImage
+        Image: !Ref vireoSNPImage
         Command:
-        - bash
-        - command.sh
+          - bash
+          - command.sh
         ReadonlyRootFilesystem: false
         Privileged: false
         ResourceRequirements:
-        - Value: '8'
-          Type: VCPU
-        - Value: '15360'
-          Type: MEMORY
-      JobDefinitionName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - vireoSNP_def
+          - Value: '8'
+            Type: VCPU
+          - Value: '15360'
+            Type: MEMORY
+      JobDefinitionName: !Join [ "_", [ !Ref PipelineName, vireoSNP_def] ]
       PlatformCapabilities:
-      - EC2
+        - EC2
       PropagateTags: false
       RetryStrategy:
         Attempts: 5
@@ -581,109 +446,58 @@ Resources:
         AttemptDurationSeconds: 1296000
       Type: container
   cellSNPFilter:
-    Type: AWS::Lambda::Function
+    Type: 'AWS::Lambda::Function'
     Properties:
       Code:
-        S3Bucket:
-          Ref: CodeBucket
+        S3Bucket: !Ref CodeBucket
         S3Key: cellSNP_filter.zip
-      Description: Filter outputs from Cellranger Batch job and sends it to cellSNP
-        Batch job
-      FunctionName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - cellSNP_filter
-      Handler: lambda_function.lambda_handler
-      Role:
-        Fn::GetAtt:
-        - LambdaRole
-        - Arn
+      Description: >-
+        Filter outputs from Cellranger Batch job and sends it to cellSNP Batch
+        job
+      FunctionName: !Join [ "_", [ !Ref PipelineName, cellSNP_filter] ] 
+      Handler: cellSNP_filter.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
       Runtime: python3.7
   SPCFilter:
-    Type: AWS::Lambda::Function
+    Type: 'AWS::Lambda::Function'
     Properties:
       Code:
-        S3Bucket:
-          Ref: CodeBucket
+        S3Bucket: !Ref CodeBucket
         S3Key: SPC_filter.zip
-      Description: Filter outputs from Cellranger Batch job and sends it to SPC Batch
-        job
-      FunctionName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - SPC_filter
-      Handler: lambda_function.lambda_handler
-      Role:
-        Fn::GetAtt:
-        - LambdaRole
-        - Arn
+      Description: Filter outputs from Cellranger Batch job and sends it to SPC Batch job
+      FunctionName: !Join [ "_", [ !Ref PipelineName, SPC_filter] ]  
+      Handler: SPC_filter.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
       Runtime: python3.7
   vireoSNPFilter:
-    Type: AWS::Lambda::Function
+    Type: 'AWS::Lambda::Function'
     Properties:
       Code:
-        S3Bucket:
-          Ref: CodeBucket
+        S3Bucket: !Ref CodeBucket
         S3Key: vireoSNP_filter.zip
-      Description: Filter outputs from cellSNP Batch job and sends it to vireoSNP
-        Batch job
-      FunctionName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - vireoSNP_filter
-      Handler: lambda_function.lambda_handler
-      Role:
-        Fn::GetAtt:
-        - LambdaRole
-        - Arn
+      Description: Filter outputs from cellSNP Batch job and sends it to vireoSNP Batch job
+      FunctionName: !Join [ "_", [ !Ref PipelineName, vireoSNP_filter] ]  
+      Handler: vireoSNP_filter.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
       Runtime: python3.7
   StateMachine:
-    Type: AWS::StepFunctions::StateMachine
+    Type: 'AWS::StepFunctions::StateMachine'
     Properties:
       DefinitionS3Location:
-        Bucket:
-          Ref: SMDefBucket
-        Key:
-          Ref: SMDefKey
+        Bucket: !Ref SMDefBucket
+        Key: !Ref SMDefKey
       DefinitionSubstitutions:
-        Cellranger_def_arn:
-          Ref: CellrangerJobDef
-        Cellranger_jq_arn:
-          Ref: CellrangerJobQueue
-        cellSNP_filter_arn:
-          Fn::GetAtt:
-          - cellSNPFilter
-          - Arn
-        cellSNP_def_arn:
-          Ref: cellSNPJobDef
-        cellSNP_jq_arn:
-          Ref: cellSNPJobQueue
-        vireoSNP_filter_arn:
-          Fn::GetAtt:
-          - vireoSNPFilter
-          - Arn
-        vireoSNP_def_arn:
-          Ref: vireoSNPJobDef
-        vireoSNP_jq_arn:
-          Ref: vireoSNPJobQueue
-        SPC_filter_arn:
-          Fn::GetAtt:
-          - SPCFilter
-          - Arn
-        SPC_def_arn:
-          Ref: SPCJobDef
-        SPC_jq_arn:
-          Ref: SPCJobQueue
-      RoleArn:
-        Fn::GetAtt:
-        - StepFunctionsRole
-        - Arn
-      StateMachineName:
-        Fn::Join:
-        - ''
-        - - Ref: PipelineName
-          - Pipeline
+        Cellranger_def_arn: !Ref CellrangerJobDef
+        Cellranger_jq_arn: !Ref CellrangerJobQueue
+        cellSNP_filter_arn: !GetAtt cellSNPFilter.Arn
+        cellSNP_def_arn: !Ref cellSNPJobDef
+        cellSNP_jq_arn: !Ref cellSNPJobQueue
+        vireoSNP_filter_arn: !GetAtt vireoSNPFilter.Arn
+        vireoSNP_def_arn: !Ref vireoSNPJobDef
+        vireoSNP_jq_arn: !Ref vireoSNPJobQueue
+        SPC_filter_arn: !GetAtt SPCFilter.Arn
+        SPC_def_arn: !Ref SPCJobDef
+        SPC_jq_arn: !Ref SPCJobQueue
+      RoleArn: !GetAtt StepFunctionsRole.Arn
+      StateMachineName: !Join [ "_", [ !Ref PipelineName, Pipeline] ] 
       StateMachineType: STANDARD
