@@ -1,34 +1,38 @@
 def lambda_handler(event, context):
-    # Fixed Variables
-    download_bucket = "cellsnp-original-result"
-    upload_bucket = "vireosnp-result"
-
     # Variables from input
     env_variables = event["Container"]["Environment"]
-    sample_id = ""
-    n_donor = ""
+    # Shared
+    SAMPLE_ID = ""
     AWS_KEY = ""
     AWS_SECRET_KEY = ""
     REGION = ""
+    # Unique
+    N_DONOR = ""
+    DOWNLOAD_BUCKET = ""
+    UPLOAD_BUCKET = ""
 
     for env in env_variables:
-        if env["Name"] == "sample_id":
-            sample_id = env["Value"]
-        elif env["Name"] == "n_donor":
-            n_donor = env["Value"]
+        if env["Name"] == "SAMPLE_ID":
+            SAMPLE_ID = env["Value"]
         elif env["Name"] == "AWS_KEY":
             AWS_KEY = env["Value"]
         elif env["Name"] == "AWS_SECRET_KEY":
             AWS_SECRET_KEY = env["Value"]
         elif env["Name"] == "REGION":
             REGION = env["Value"]
+        elif env["Name"] == "UPLOAD_BUCKET":
+            DOWNLOAD_BUCKET = env["Value"]
+        elif env["Name"] == "VS_UPLOAD_BUCKET":
+            UPLOAD_BUCKET = env["Value"]
+        elif env["Name"] == "VS_N_DONOR":
+            N_DONOR = env["Value"]
 
     return {
-        "sample_id": sample_id,
-        "n_donor": n_donor,
-        "download_bucket": download_bucket,
-        "upload_bucket": upload_bucket,
-        "AWS_KEY": AWS_KEY,
+        "SAMPLE_ID": SAMPLE_ID,
+        "AWS_KEY":  AWS_KEY,
         "AWS_SECRET_KEY": AWS_SECRET_KEY,
-        "REGION": REGION
+        "REGION": REGION,
+        "DOWNLOAD_BUCKET": DOWNLOAD_BUCKET,
+        "UPLOAD_BUCKET": UPLOAD_BUCKET,
+        "N_DONOR": N_DONOR,
     }
