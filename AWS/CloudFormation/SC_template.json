@@ -1,5 +1,9 @@
 {
     "Parameters": {
+        "PipelineName": {
+            "Type": "String",
+            "Description": "Name of the pipeline (e.g. SC_pipeline)"
+        },
         "Subnets": {
             "Type": "List<AWS::EC2::Subnet::Id>",
             "Description": "Subnets to use for Batch compute environment"
@@ -27,6 +31,18 @@
         "SPCImage": {
             "Type": "String",
             "Description": "SPC docker image uri"
+        },
+        "SMDefBucket" :{
+            "Type": "String",
+            "Description": "S3 Bucket name of where state machine definition is stored"
+        },
+        "SMDefKey" :{
+            "Type": "String",
+            "Description": "Object Key name of state machine definition file (e.g. definition.json)"
+        },
+        "CodeBucket" :{
+            "Type": "String",
+            "Description": "S3 Bucket name of where Lambda codes are saved"
         }
     },
     "Resources": {
@@ -50,7 +66,7 @@
                         "",
                         [
                             {
-                                "Ref": "AWS::Region"
+                                "Ref": "PipelineName"
                             },
                             "LambdaRole"
                         ]
@@ -81,7 +97,7 @@
                         "",
                         [
                             {
-                                "Ref": "AWS::Region"
+                                "Ref": "PipelineName"
                             },
                             "BatchServiceLinkedRole"
                         ]
@@ -112,7 +128,7 @@
                         "",
                         [
                             {
-                                "Ref": "AWS::Region"
+                                "Ref": "PipelineName"
                             },
                             "ECSInstanceRole"
                         ]
@@ -120,16 +136,28 @@
                 }
             }
         },
-        "ECSInstanceProfile" : {
-            "Type" : "AWS::IAM::InstanceProfile",
-            "Properties" : {
-                "InstanceProfileName" : "BatchInstance",
-                "Path" : "/",
-                "Roles" : [ {"Ref" : "ECSInstanceRole"} ]
-              }
-        } 
-          ,
-
+        "ECSInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "InstanceProfileName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "BatchInstance"
+                        ]
+                    ]
+                },
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "ECSInstanceRole"
+                    }
+                ]
+            }
+        },
         "StepFunctionsRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -154,7 +182,7 @@
                         "",
                         [
                             {
-                                "Ref": "AWS::Region"
+                                "Ref": "PipelineName"
                             },
                             "StepFunctionsRole"
                         ]
@@ -196,7 +224,17 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "Security group for compute resources that AWS Batch job would initiate",
-                "GroupName": "BatchSecurityGroup",
+                "GroupName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "BatchSecurityGroup"
+                        ]
+                    ]
+                },
                 "SecurityGroupEgress": [
                     {
                         "CidrIp": "0.0.0.0/0",
@@ -246,7 +284,17 @@
                     ],
                     "UserData": "TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
                 },
-                "LaunchTemplateName": "500GB_gp3"
+                "LaunchTemplateName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "500GB_gp3"
+                        ]
+                    ]
+                }
             }
         },
         "1TBgp3LaunchTemplate": {
@@ -273,7 +321,17 @@
                     ],
                     "UserData": "TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
                 },
-                "LaunchTemplateName": "1TB_gp3"
+                "LaunchTemplateName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "1TB_gp3"
+                        ]
+                    ]
+                }
             }
         },
         "1TBst1LaunchTemplate": {
@@ -300,13 +358,33 @@
                     ],
                     "UserData": "TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
                 },
-                "LaunchTemplateName": "1TB_st1"
+                "LaunchTemplateName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "1TB_st1"
+                        ]
+                    ]
+                }
             }
         },
         "500GBgp3ComputeEnv": {
             "Type": "AWS::Batch::ComputeEnvironment",
             "Properties": {
-                "ComputeEnvironmentName": "500GB_gp3_spot",
+                "ComputeEnvironmentName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "500GB_gp3_spot"
+                        ]
+                    ]
+                },
                 "Type": "MANAGED",
                 "State": "ENABLED",
                 "ServiceRole": {
@@ -322,7 +400,9 @@
                     "Ec2KeyPair": {
                         "Ref": "KeyPair"
                     },
-                    "InstanceRole": {"Ref" : "ECSInstanceProfile"},
+                    "InstanceRole": {
+                        "Ref": "ECSInstanceProfile"
+                    },
                     "InstanceTypes": [
                         "c5.2xlarge",
                         "c5a.2xlarge",
@@ -361,7 +441,17 @@
         "1TBgp3ComputeEnv": {
             "Type": "AWS::Batch::ComputeEnvironment",
             "Properties": {
-                "ComputeEnvironmentName": "1TB_gp3_spot",
+                "ComputeEnvironmentName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "1TB_gp3_spot"
+                        ]
+                    ]
+                },
                 "Type": "MANAGED",
                 "State": "ENABLED",
                 "ServiceRole": {
@@ -377,7 +467,9 @@
                     "Ec2KeyPair": {
                         "Ref": "KeyPair"
                     },
-                    "InstanceRole": {"Ref" : "ECSInstanceProfile"},
+                    "InstanceRole": {
+                        "Ref": "ECSInstanceProfile"
+                    },
                     "InstanceTypes": [
                         "c5.2xlarge",
                         "c5a.2xlarge",
@@ -416,7 +508,17 @@
         "1TBst1ComputeEnv": {
             "Type": "AWS::Batch::ComputeEnvironment",
             "Properties": {
-                "ComputeEnvironmentName": "1TB_st1_spot",
+                "ComputeEnvironmentName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "1TB_st1_spot"
+                        ]
+                    ]
+                },
                 "Type": "MANAGED",
                 "State": "ENABLED",
                 "ServiceRole": {
@@ -432,7 +534,9 @@
                     "Ec2KeyPair": {
                         "Ref": "KeyPair"
                     },
-                    "InstanceRole": {"Ref" : "ECSInstanceProfile"},
+                    "InstanceRole": {
+                        "Ref": "ECSInstanceProfile"
+                    },
                     "InstanceTypes": [
                         "c5.2xlarge",
                         "c5a.2xlarge",
@@ -471,7 +575,17 @@
         "DefaultComputeEnv": {
             "Type": "AWS::Batch::ComputeEnvironment",
             "Properties": {
-                "ComputeEnvironmentName": "default_spot",
+                "ComputeEnvironmentName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "default_spot"
+                        ]
+                    ]
+                },
                 "Type": "MANAGED",
                 "State": "ENABLED",
                 "ServiceRole": {
@@ -487,7 +601,9 @@
                     "Ec2KeyPair": {
                         "Ref": "KeyPair"
                     },
-                    "InstanceRole": {"Ref" : "ECSInstanceProfile"},
+                    "InstanceRole": {
+                        "Ref": "ECSInstanceProfile"
+                    },
                     "InstanceTypes": [
                         "c5.2xlarge",
                         "c5a.2xlarge",
@@ -521,7 +637,17 @@
                         "Order": 1
                     }
                 ],
-                "JobQueueName": "Cellranger",
+                "JobQueueName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "Cellranger"
+                        ]
+                    ]
+                },
                 "Priority": 1,
                 "State": "ENABLED"
             }
@@ -537,7 +663,17 @@
                         "Order": 1
                     }
                 ],
-                "JobQueueName": "cellSNP",
+                "JobQueueName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "cellSNP"
+                        ]
+                    ]
+                },
                 "Priority": 1,
                 "State": "ENABLED"
             }
@@ -553,7 +689,17 @@
                         "Order": 1
                     }
                 ],
-                "JobQueueName": "SPC",
+                "JobQueueName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "SPC"
+                        ]
+                    ]
+                },
                 "Priority": 1,
                 "State": "ENABLED"
             }
@@ -569,7 +715,17 @@
                         "Order": 1
                     }
                 ],
-                "JobQueueName": "vireoSNP",
+                "JobQueueName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "vireoSNP"
+                        ]
+                    ]
+                },
                 "Priority": 1,
                 "State": "ENABLED"
             }
@@ -613,7 +769,17 @@
                         }
                     ]
                 },
-                "JobDefinitionName": "Cellranger_def",
+                "JobDefinitionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "Cellranger_def"
+                        ]
+                    ]
+                },
                 "PlatformCapabilities": [
                     "EC2"
                 ],
@@ -666,7 +832,17 @@
                         }
                     ]
                 },
-                "JobDefinitionName": "cellSNP_def",
+                "JobDefinitionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "cellSNP_def"
+                        ]
+                    ]
+                },
                 "PlatformCapabilities": [
                     "EC2"
                 ],
@@ -719,7 +895,17 @@
                         }
                     ]
                 },
-                "JobDefinitionName": "SPC_def",
+                "JobDefinitionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "SPC_def"
+                        ]
+                    ]
+                },
                 "PlatformCapabilities": [
                     "EC2"
                 ],
@@ -757,7 +943,17 @@
                         }
                     ]
                 },
-                "JobDefinitionName": "vireoSNP_def",
+                "JobDefinitionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "vireoSNP_def"
+                        ]
+                    ]
+                },
                 "PlatformCapabilities": [
                     "EC2"
                 ],
@@ -775,11 +971,22 @@
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Code": {
-                    "ZipFile": "def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellranger-result-bucket'\n    upload_bucket = 'cellsnp-original-result'\n    threads = '22'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    min_MAF = ''\n    min_count = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    n_donor = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'min_MAF':\n            min_MAF = env['Value']\n        elif env['Name'] == 'min_count':\n            min_count = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n        elif env['Name'] == 'n_donor':\n            n_donor = env['Value']\n    return {\n    'sample_id': sample_id,\n    'min_MAF': min_MAF,\n    'min_count': min_count,\n    'download_bucket':download_bucket,\n    'upload_bucket':upload_bucket,\n    'threads':threads,\n    'n_donor': n_donor,\n    'AWS_KEY': AWS_KEY,\n    'AWS_SECRET_KEY': AWS_SECRET_KEY,\n    'REGION' : REGION\n    }"
+                    "S3Bucket" : {"Ref" : "CodeBucket"},
+                    "S3Key" : "cellSNP_filter.zip"
                 },
                 "Description": "Filter outputs from Cellranger Batch job and sends it to cellSNP Batch job",
-                "FunctionName": "cellSNP_filter_function",
-                "Handler": "index.lambda_handler",
+                "FunctionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "cellSNP_filter"
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
                 "Role": {
                     "Fn::GetAtt": [
                         "LambdaRole",
@@ -793,11 +1000,22 @@
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Code": {
-                    "ZipFile": "def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellranger-result-bucket'\n    upload_bucket = 'spc-result-bucket'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    num_clusters = ''\n    threads = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'num_clusters':\n            num_clusters = env['Value']\n        elif env['Name'] == 'SPC_threads':\n            threads = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n    return {\n        'sample_id': sample_id,\n        'download_bucket': download_bucket,\n        'upload_bucket': upload_bucket,\n        'threads': threads,\n        'num_clusters': num_clusters,\n        'AWS_KEY': AWS_KEY,\n        'AWS_SECRET_KEY': AWS_SECRET_KEY,\n        'REGION' : REGION}"
+                    "S3Bucket" : {"Ref" : "CodeBucket"},
+                    "S3Key" : "SPC_filter.zip"
                 },
                 "Description": "Filter outputs from Cellranger Batch job and sends it to SPC Batch job",
-                "FunctionName": "SPC_filter_function",
-                "Handler": "index.lambda_handler",
+                "FunctionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "SPC_filter"
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
                 "Role": {
                     "Fn::GetAtt": [
                         "LambdaRole",
@@ -811,11 +1029,22 @@
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Code": {
-                    "ZipFile": "def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellsnp-original-result'\n    upload_bucket = 'vireosnp-result'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    n_donor = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'n_donor':\n            n_donor = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n    return {\n        sample_id': sample_id,\n        'n_donor': n_donor,\n        'download_bucket':download_bucket,\n        'upload_bucket':upload_bucket,\n        'AWS_KEY': AWS_KEY,\n        'AWS_SECRET_KEY': AWS_SECRET_KEY,\n        'REGION' : REGION}"
+                    "S3Bucket" : {"Ref" : "CodeBucket"},
+                    "S3Key" : "vireoSNP_filter.zip"
                 },
                 "Description": "Filter outputs from cellSNP Batch job and sends it to vireoSNP Batch job",
-                "FunctionName": "vireoSNP_filter_function",
-                "Handler": "index.lambda_handler",
+                "FunctionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "vireoSNP_filter"
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
                 "Role": {
                     "Fn::GetAtt": [
                         "LambdaRole",
@@ -828,7 +1057,10 @@
         "StateMachine": {
             "Type": "AWS::StepFunctions::StateMachine",
             "Properties": {
-                "DefinitionString": "{\"Comment\": \"Single Cell sequencing pipeline's state machine\",\"StartAt\": \"Cell Ranger\",\"States\": {\"Cell Ranger\": {\"Type\": \"Task\",\"Resource\": \"arn:aws:states:::batch:submitJob.sync\",\"Parameters\": {\"JobDefinition\": \"${Cellranger_def_arn}\",\"JobName.$\": \"$.sample_id\",\"JobQueue\": \"${Cellranger_jq_arn}\",\"ContainerOverrides\": {\"Environment\": [{\"Name\": \"AWS_KEY\",\"Value.$\": \"$.AWS_KEY\"},{\"Name\": \"AWS_SECRET_KEY\",\"Value.$\": \"$.AWS_SECRET_KEY\"},{\"Name\": \"REGION\",\"Value.$\": \"$.REGION\"},{\"Name\": \"download_bucket\",\"Value.$\": \"$.download_bucket\"},{\"Name\": \"upload_bucket\",\"Value.$\": \"$.upload_bucket\"},{\"Name\": \"sample_id\",\"Value.$\": \"$.sample_id\"},{\"Name\": \"core\",\"Value.$\": \"$.core\"},{\"Name\": \"memory\",\"Value.$\": \"$.memory\"},{\"Name\": \"expect_cells\",\"Value.$\": \"$.expect_cells\"},{\"Name\": \"threads\",\"Value.$\": \"$.threads\"},{\"Name\": \"SPC_threads\",\"Value.$\": \"$.SPC_threads\"},{\"Name\": \"min_MAF\",\"Value.$\": \"$.min_MAF\"},{\"Name\": \"min_count\",\"Value.$\": \"$.min_count\"},{\"Name\": \"n_donor\",\"Value.$\": \"$.n_donor\"},{\"Name\": \"num_clusters\",\"Value.$\": \"$.num_clusters\"}]}},\"Next\": \"Parallel\"},\"Parallel\": {\"Type\": \"Parallel\",\"Branches\": [{\"StartAt\": \"filter_1\",\"States\": {\"filter_1\": {\"Type\": \"Task\",\"Resource\": \"${cellSNP_filter_arn}\",\"Next\": \"CellSNP\"},\"CellSNP\": {\"Type\": \"Task\",\"Resource\": \"arn:aws:states:::batch:submitJob.sync\",\"Parameters\": {\"JobDefinition\": \"${cellSNP_def_arn}\",\"JobName.$\": \"$.sample_id\",\"JobQueue\": \"${cellSNP_jq_arn}\",\"ContainerOverrides\": {\"Environment\": [{\"Name\": \"AWS_KEY\",\"Value.$\": \"$.AWS_KEY\"},{\"Name\": \"AWS_SECRET_KEY\",\"Value.$\": \"$.AWS_SECRET_KEY\"},{\"Name\": \"REGION\",\"Value.$\": \"$.REGION\"},{\"Name\": \"download_bucket\",\"Value.$\": \"$.download_bucket\"},{\"Name\": \"upload_bucket\",\"Value.$\": \"$.upload_bucket\"},{\"Name\": \"sample_id\",\"Value.$\": \"$.sample_id\"},{\"Name\": \"threads\",\"Value.$\": \"$.threads\"},{\"Name\": \"min_MAF\",\"Value.$\": \"$.min_MAF\"},{\"Name\": \"min_count\",\"Value.$\": \"$.min_count\"},{\"Name\": \"n_donor\",\"Value.$\": \"$.n_donor\"}]}},\"Next\": \"filter_2\"},\"filter_2\": {\"Type\": \"Task\",\"Resource\": \"${vireoSNP_filter_arn}\",\"Next\": \"VireoSNP\"},\"VireoSNP\": {\"Type\": \"Task\",\"Resource\": \"arn:aws:states:::batch:submitJob.sync\",\"Parameters\": {\"JobDefinition\": \"${vireoSNP_def_arn}\",\"JobName.$\": \"$.sample_id\",\"JobQueue\": \"${vireoSNP_jq_arn}\",\"ContainerOverrides\": {\"Environment\": [{\"Name\": \"AWS_KEY\",\"Value.$\": \"$.AWS_KEY\"},{\"Name\": \"AWS_SECRET_KEY\",\"Value.$\": \"$.AWS_SECRET_KEY\"},{\"Name\": \"REGION\",\"Value.$\": \"$.REGION\"},{\"Name\": \"download_bucket\",\"Value.$\": \"$.download_bucket\"},{\"Name\": \"upload_bucket\",\"Value.$\": \"$.upload_bucket\"},{\"Name\": \"sample_id\",\"Value.$\": \"$.sample_id\"},{\"Name\": \"n_donor\",\"Value.$\": \"$.n_donor\"}]}},\"End\": true}}},{\"StartAt\": \"filter_3\",\"States\": {\"filter_3\": {\"Type\": \"Task\",\"Resource\": \"${SPC_filter_arn}\",\"Next\": \"SPC\"},\"SPC\": {\"Type\": \"Task\",\"Resource\": \"arn:aws:states:::batch:submitJob.sync\",\"Parameters\": {\"JobDefinition\": \"${SPC_def_arn}\",\"JobName.$\": \"$.sample_id\",\"JobQueue\": \"${SPC_jq_arn}\",\"ContainerOverrides\": {\"Environment\": [{\"Name\": \"AWS_KEY\",\"Value.$\": \"$.AWS_KEY\"},{\"Name\": \"AWS_SECRET_KEY\",\"Value.$\": \"$.AWS_SECRET_KEY\"},{\"Name\": \"REGION\",\"Value.$\": \"$.REGION\"},{\"Name\": \"download_bucket\",\"Value.$\": \"$.download_bucket\"},{\"Name\": \"upload_bucket\",\"Value.$\": \"$.upload_bucket\"},{\"Name\": \"sample_id\",\"Value.$\": \"$.sample_id\"},{\"Name\": \"threads\",\"Value.$\": \"$.threads\"},{\"Name\": \"num_clusters\",\"Value.$\": \"$.num_clusters\"}]}},\"End\": true}}}],\"End\": true}}}",
+                "DefinitionS3Location": {
+                    "Bucket" : {"Ref" : "SMDefBucket"},
+                    "Key" : {"Ref" : "SMDefKey"}
+                  },
                 "DefinitionSubstitutions": {
                     "Cellranger_def_arn": {
                         "Ref": "CellrangerJobDef"
@@ -879,7 +1111,17 @@
                         "Arn"
                     ]
                 },
-                "StateMachineName": "Single_Cell_Sequencing_Pipeline",
+                "StateMachineName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "PipelineName"
+                            },
+                            "Pipeline"
+                        ]
+                    ]
+                },
                 "StateMachineType": "STANDARD"
             }
         }

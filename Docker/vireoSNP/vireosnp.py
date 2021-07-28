@@ -53,6 +53,7 @@ def upload_obj(s3_resource, bucket_name, path, key):
     print(f"{key} uploaded")
     return
 
+
 subprocess.run("echo '###### Uploading Result Files #######' ", shell=True)
 upload_obj(s3_resource, upload_bucket, output_path, sample_id)
 
