@@ -1,39 +1,39 @@
 {
-    "Parameters":{
-        "Subnets":{
-            "Type" : "List<AWS::EC2::Subnet::Id>",
-            "Description" : "Subnets to use for Batch compute environment"
+    "Parameters": {
+        "Subnets": {
+            "Type": "List<AWS::EC2::Subnet::Id>",
+            "Description": "Subnets to use for Batch compute environment"
         },
-        "VPC":{
-            "Type" : "AWS::EC2::VPC::Id",
-            "Description" : "VPC ID for the pipeline (e.g. vpc-a123baa3)"
+        "VPC": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "VPC ID for the pipeline (e.g. vpc-a123baa3)"
         },
-        "KeyPair":{
-            "Type" : "AWS::EC2::KeyPair::KeyName",
-            "Description" : "Name of the EC2 keypair which will be used in the pipeline"
+        "KeyPair": {
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Description": "Name of the EC2 keypair which will be used in the pipeline"
         },
-        "CellrangerImage":{
-            "Type" : "String",
-            "Description" : "Cellranger docker image uri"
+        "CellrangerImage": {
+            "Type": "String",
+            "Description": "Cellranger docker image uri"
         },
-        "cellSNPImage":{
-            "Type" : "String",
-            "Description" : "cellSNP docker image uri"
+        "cellSNPImage": {
+            "Type": "String",
+            "Description": "cellSNP docker image uri"
         },
-        "vireoSNPImage":{
-            "Type" : "String",
-            "Description" : "vireoSNP docker image uri"
+        "vireoSNPImage": {
+            "Type": "String",
+            "Description": "vireoSNP docker image uri"
         },
-        "SPCImage":{
-            "Type" : "String",
-            "Description" : "SPC docker image uri"
+        "SPCImage": {
+            "Type": "String",
+            "Description": "SPC docker image uri"
         }
     },
     "Resources": {
-        "LambdaRole":{
-            "Type" : "AWS::IAM::Role",
-            "Properties" : {
-                "AssumeRolePolicyDocument" : {
+        "LambdaRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
                         {
@@ -45,51 +45,195 @@
                         }
                     ]
                 },
-                "RoleName" : {"Fn::Join": ["", [{"Ref": "AWS::Region"}, "LambdaRole"]]}                }
+                "RoleName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            "LambdaRole"
+                        ]
+                    ]
+                }
+            }
         },
-        "BatchServiceLinkedRole":{
-            "Type" : "AWS::IAM::ServiceLinkedRole",
+        "BatchServiceLinkedRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "batch.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
+                ],
+                "RoleName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            "BatchServiceLinkedRole"
+                        ]
+                    ]
+                }
+            }
+        },
+        "ECSInstanceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "ec2.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+                ],
+                "RoleName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            "ECSInstanceRole"
+                        ]
+                    ]
+                }
+            }
+        },
+        "ECSInstanceProfile" : {
+            "Type" : "AWS::IAM::InstanceProfile",
             "Properties" : {
-                "AWSServiceName" : "batch.amazonaws.com"
+                "InstanceProfileName" : "BatchInstance",
+                "Path" : "/",
+                "Roles" : [ {"Ref" : "ECSInstanceRole"} ]
+              }
+        } 
+          ,
+
+        "StepFunctionsRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "states.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
+                ],
+                "RoleName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            "StepFunctionsRole"
+                        ]
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": "BatchSync",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "batch:SubmitJob",
+                                        "batch:DescribeJobs",
+                                        "batch:TerminateJob"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "events:PutTargets",
+                                        "events:PutRule",
+                                        "events:DescribeRule"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
             }
         },
         "BatchSecurityGroup": {
-            "Type" : "AWS::EC2::SecurityGroup",
-            "Properties" : {
-                "GroupDescription" : "Security group for compute resources that AWS Batch job would initiate",
-                "GroupName" : "BatchSecurityGroup",
-                "SecurityGroupEgress" : [ {
-                    "CidrIp": "0.0.0.0/0", 
-                    "IpProtocol": -1
-                  } ],
-                "SecurityGroupIngress" : [ {
-                    "CidrIp": "0.0.0.0/0", 
-                    "IpProtocol": "tcp", 
-                    "FromPort": 22, 
-                    "ToPort": 22
-                },
-                {
-                    "CidrIp": "0.0.0.0/0", 
-                    "IpProtocol": "tcp", 
-                    "FromPort": 2049, 
-                    "ToPort": 2049
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security group for compute resources that AWS Batch job would initiate",
+                "GroupName": "BatchSecurityGroup",
+                "SecurityGroupEgress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "IpProtocol": -1
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "IpProtocol": "tcp",
+                        "FromPort": 22,
+                        "ToPort": 22
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "IpProtocol": "tcp",
+                        "FromPort": 2049,
+                        "ToPort": 2049
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
                 }
-             ],
-                "VpcId" : {"Ref" : "VPC"}
-              }
-          },
-        "500GBgp3LaunchTemplate":{
-            "Type" : "AWS::EC2::LaunchTemplate",
-            "Properties" : {
-                "LaunchTemplateData" : {
-                    "BlockDeviceMappings" : [
+            }
+        },
+        "500GBgp3LaunchTemplate": {
+            "Type": "AWS::EC2::LaunchTemplate",
+            "Properties": {
+                "LaunchTemplateData": {
+                    "BlockDeviceMappings": [
                         {
                             "DeviceName": "/dev/xvda",
                             "Ebs": {
                                 "DeleteOnTermination": true,
                                 "VolumeSize": 50,
                                 "VolumeType": "gp3"
-                                }
+                            }
                         },
                         {
                             "DeviceName": "/dev/xvdb",
@@ -97,26 +241,26 @@
                                 "DeleteOnTermination": true,
                                 "VolumeSize": 500,
                                 "VolumeType": "gp3"
-                                }
+                            }
                         }
                     ],
-                    "UserData":"TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
+                    "UserData": "TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
                 },
-                "LaunchTemplateName" : "500GB_gp3"
+                "LaunchTemplateName": "500GB_gp3"
             }
         },
-        "1TBgp3LaunchTemplate":{
-            "Type" : "AWS::EC2::LaunchTemplate",
-            "Properties" : {
-                "LaunchTemplateData" : {
-                    "BlockDeviceMappings" : [
+        "1TBgp3LaunchTemplate": {
+            "Type": "AWS::EC2::LaunchTemplate",
+            "Properties": {
+                "LaunchTemplateData": {
+                    "BlockDeviceMappings": [
                         {
                             "DeviceName": "/dev/xvda",
                             "Ebs": {
                                 "DeleteOnTermination": true,
                                 "VolumeSize": 50,
                                 "VolumeType": "gp3"
-                                }
+                            }
                         },
                         {
                             "DeviceName": "/dev/xvdb",
@@ -124,26 +268,26 @@
                                 "DeleteOnTermination": true,
                                 "VolumeSize": 1000,
                                 "VolumeType": "gp3"
-                                }
+                            }
                         }
                     ],
-                    "UserData":"TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
+                    "UserData": "TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
                 },
-                "LaunchTemplateName" : "1TB_gp3"
+                "LaunchTemplateName": "1TB_gp3"
             }
         },
-        "1TBst1LaunchTemplate":{
-            "Type" : "AWS::EC2::LaunchTemplate",
-            "Properties" : {
-                "LaunchTemplateData" : {
-                    "BlockDeviceMappings" : [
+        "1TBst1LaunchTemplate": {
+            "Type": "AWS::EC2::LaunchTemplate",
+            "Properties": {
+                "LaunchTemplateData": {
+                    "BlockDeviceMappings": [
                         {
                             "DeviceName": "/dev/xvda",
                             "Ebs": {
                                 "DeleteOnTermination": true,
                                 "VolumeSize": 50,
                                 "VolumeType": "gp3"
-                                }
+                            }
                         },
                         {
                             "DeviceName": "/dev/xvdb",
@@ -151,28 +295,35 @@
                                 "DeleteOnTermination": true,
                                 "VolumeSize": 1000,
                                 "VolumeType": "st1"
-                                }
+                            }
                         }
                     ],
-                    "UserData":"TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
+                    "UserData": "TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t"
                 },
-                "LaunchTemplateName" : "1TB_st1"
+                "LaunchTemplateName": "1TB_st1"
             }
         },
-        "500GBgp3ComputeEnv":{
-            "Type" : "AWS::Batch::ComputeEnvironment",
-            "Properties" : {
-                "ComputeEnvironmentName" : "500GB_gp3_spot",
+        "500GBgp3ComputeEnv": {
+            "Type": "AWS::Batch::ComputeEnvironment",
+            "Properties": {
+                "ComputeEnvironmentName": "500GB_gp3_spot",
                 "Type": "MANAGED",
                 "State": "ENABLED",
-                "ServiceRole" : {"Ref" : "BatchServiceLinkedRole"},
-                "ComputeResources" :{
-                    "Type" : "SPOT",
-                    "AllocationStrategy" : "SPOT_CAPACITY_OPTIMIZED",
-                    "BidPercentage" : 100,
-                    "Ec2KeyPair" : {"Ref" : "KeyPair"},
-                    "InstanceRole" : "ecsInstanceRole",
-                    "InstanceTypes" : [
+                "ServiceRole": {
+                    "Fn::GetAtt": [
+                        "BatchServiceLinkedRole",
+                        "Arn"
+                    ]
+                },
+                "ComputeResources": {
+                    "Type": "SPOT",
+                    "AllocationStrategy": "SPOT_CAPACITY_OPTIMIZED",
+                    "BidPercentage": 100,
+                    "Ec2KeyPair": {
+                        "Ref": "KeyPair"
+                    },
+                    "InstanceRole": {"Ref" : "ECSInstanceProfile"},
+                    "InstanceTypes": [
                         "c5.2xlarge",
                         "c5a.2xlarge",
                         "c5.4xlarge",
@@ -180,41 +331,54 @@
                         "c5a.8xlarge",
                         "c5.9xlarge"
                     ],
-                    "LaunchTemplate" : {
-                        "LaunchTemplateId" : {"Ref": "500GBgp3LaunchTemplate"},
-                        "Version" : {"Fn::GetAtt": [
-                            "500GBgp3LaunchTemplate",
-                            "LatestVersionNumber"
-                        ]}
-                      },
-                    "MaxvCpus" : 512,
-                    "MinvCpus" : 0,
-                    "SecurityGroupIds" : [ {
-                        "Fn::GetAtt": [
-                            "BatchSecurityGroup",
-                            "GroupId"
-                        ]
-                    } ],
-                    "Subnets" : {"Ref" : "Subnets"}
-                    
-                  }
+                    "LaunchTemplate": {
+                        "LaunchTemplateId": {
+                            "Ref": "500GBgp3LaunchTemplate"
+                        },
+                        "Version": {
+                            "Fn::GetAtt": [
+                                "500GBgp3LaunchTemplate",
+                                "LatestVersionNumber"
+                            ]
+                        }
+                    },
+                    "MaxvCpus": 512,
+                    "MinvCpus": 0,
+                    "SecurityGroupIds": [
+                        {
+                            "Fn::GetAtt": [
+                                "BatchSecurityGroup",
+                                "GroupId"
+                            ]
+                        }
+                    ],
+                    "Subnets": {
+                        "Ref": "Subnets"
+                    }
+                }
             }
-            
         },
-        "1TBgp3ComputeEnv":{
-            "Type" : "AWS::Batch::ComputeEnvironment",
-            "Properties" : {
-                "ComputeEnvironmentName" : "1TB_gp3_spot",
+        "1TBgp3ComputeEnv": {
+            "Type": "AWS::Batch::ComputeEnvironment",
+            "Properties": {
+                "ComputeEnvironmentName": "1TB_gp3_spot",
                 "Type": "MANAGED",
                 "State": "ENABLED",
-                "ServiceRole" : {"Ref" : "BatchServiceLinkedRole"},
-                "ComputeResources" :{
-                    "Type" : "SPOT",
-                    "AllocationStrategy" : "SPOT_CAPACITY_OPTIMIZED",
-                    "BidPercentage" : 100,
-                    "Ec2KeyPair" : {"Ref" : "KeyPair"},
-                    "InstanceRole" : "ecsInstanceRole",
-                    "InstanceTypes" : [
+                "ServiceRole": {
+                    "Fn::GetAtt": [
+                        "BatchServiceLinkedRole",
+                        "Arn"
+                    ]
+                },
+                "ComputeResources": {
+                    "Type": "SPOT",
+                    "AllocationStrategy": "SPOT_CAPACITY_OPTIMIZED",
+                    "BidPercentage": 100,
+                    "Ec2KeyPair": {
+                        "Ref": "KeyPair"
+                    },
+                    "InstanceRole": {"Ref" : "ECSInstanceProfile"},
+                    "InstanceTypes": [
                         "c5.2xlarge",
                         "c5a.2xlarge",
                         "c5.4xlarge",
@@ -222,39 +386,54 @@
                         "c5a.8xlarge",
                         "c5.9xlarge"
                     ],
-                    "LaunchTemplate" : {
-                        "LaunchTemplateId" : {"Ref": "1TBgp3LaunchTemplate"},
-                        "Version" : {"Fn::GetAtt": [
-                            "1TBgp3LaunchTemplate",
-                            "LatestVersionNumber"
-                        ]}
-                      },
-                    "MaxvCpus" : 512,
-                    "MinvCpus" : 0,
-                    "SecurityGroupIds" : [ {
-                        "Fn::GetAtt": [
-                            "BatchSecurityGroup",
-                            "GroupId"
-                        ]
-                    } ],
-                    "Subnets" : {"Ref" : "Subnets"}
-                  }
+                    "LaunchTemplate": {
+                        "LaunchTemplateId": {
+                            "Ref": "1TBgp3LaunchTemplate"
+                        },
+                        "Version": {
+                            "Fn::GetAtt": [
+                                "1TBgp3LaunchTemplate",
+                                "LatestVersionNumber"
+                            ]
+                        }
+                    },
+                    "MaxvCpus": 512,
+                    "MinvCpus": 0,
+                    "SecurityGroupIds": [
+                        {
+                            "Fn::GetAtt": [
+                                "BatchSecurityGroup",
+                                "GroupId"
+                            ]
+                        }
+                    ],
+                    "Subnets": {
+                        "Ref": "Subnets"
+                    }
+                }
             }
         },
-        "1TBst1ComputeEnv":{
-            "Type" : "AWS::Batch::ComputeEnvironment",
-            "Properties" : {
-                "ComputeEnvironmentName" : "1TB_st1_spot",
+        "1TBst1ComputeEnv": {
+            "Type": "AWS::Batch::ComputeEnvironment",
+            "Properties": {
+                "ComputeEnvironmentName": "1TB_st1_spot",
                 "Type": "MANAGED",
                 "State": "ENABLED",
-                "ServiceRole" : {"Ref" : "BatchServiceLinkedRole"},
-                "ComputeResources" :{
-                    "Type" : "SPOT",
-                    "AllocationStrategy" : "SPOT_CAPACITY_OPTIMIZED",
-                    "BidPercentage" : 100,
-                    "Ec2KeyPair" : {"Ref" : "KeyPair"},
-                    "InstanceRole" : "ecsInstanceRole",
-                    "InstanceTypes" : [
+                "ServiceRole": {
+                    "Fn::GetAtt": [
+                        "BatchServiceLinkedRole",
+                        "Arn"
+                    ]
+                },
+                "ComputeResources": {
+                    "Type": "SPOT",
+                    "AllocationStrategy": "SPOT_CAPACITY_OPTIMIZED",
+                    "BidPercentage": 100,
+                    "Ec2KeyPair": {
+                        "Ref": "KeyPair"
+                    },
+                    "InstanceRole": {"Ref" : "ECSInstanceProfile"},
+                    "InstanceTypes": [
                         "c5.2xlarge",
                         "c5a.2xlarge",
                         "c5.4xlarge",
@@ -262,109 +441,146 @@
                         "c5a.8xlarge",
                         "c5.9xlarge"
                     ],
-                    "LaunchTemplate" : {
-                        "LaunchTemplateId" : {"Ref": "1TBst1LaunchTemplate"},
-                        "Version" : {"Fn::GetAtt": [
-                            "1TBst1LaunchTemplate",
-                            "LatestVersionNumber"
-                        ]}
-                      },
-                    "MaxvCpus" : 512,
-                    "MinvCpus" : 0,
-                    "SecurityGroupIds" : [ {
-                        "Fn::GetAtt": [
-                            "BatchSecurityGroup",
-                            "GroupId"
-                        ]
-                    } ],
-                    "Subnets" : {"Ref" : "Subnets"}
-                  }
+                    "LaunchTemplate": {
+                        "LaunchTemplateId": {
+                            "Ref": "1TBst1LaunchTemplate"
+                        },
+                        "Version": {
+                            "Fn::GetAtt": [
+                                "1TBst1LaunchTemplate",
+                                "LatestVersionNumber"
+                            ]
+                        }
+                    },
+                    "MaxvCpus": 512,
+                    "MinvCpus": 0,
+                    "SecurityGroupIds": [
+                        {
+                            "Fn::GetAtt": [
+                                "BatchSecurityGroup",
+                                "GroupId"
+                            ]
+                        }
+                    ],
+                    "Subnets": {
+                        "Ref": "Subnets"
+                    }
+                }
             }
         },
-        "DefaultComputeEnv":{
-            "Type" : "AWS::Batch::ComputeEnvironment",
-            "Properties" : {
-                "ComputeEnvironmentName" : "default_spot",
+        "DefaultComputeEnv": {
+            "Type": "AWS::Batch::ComputeEnvironment",
+            "Properties": {
+                "ComputeEnvironmentName": "default_spot",
                 "Type": "MANAGED",
                 "State": "ENABLED",
-                "ServiceRole" : {"Ref" : "BatchServiceLinkedRole"},
-                "ComputeResources" :{
-                    "Type" : "SPOT",
-                    "AllocationStrategy" : "SPOT_CAPACITY_OPTIMIZED",
-                    "BidPercentage" : 100,
-                    "Ec2KeyPair" : {"Ref" : "KeyPair"},
-                    "InstanceRole" : "ecsInstanceRole",
-                    "InstanceTypes" : [
+                "ServiceRole": {
+                    "Fn::GetAtt": [
+                        "BatchServiceLinkedRole",
+                        "Arn"
+                    ]
+                },
+                "ComputeResources": {
+                    "Type": "SPOT",
+                    "AllocationStrategy": "SPOT_CAPACITY_OPTIMIZED",
+                    "BidPercentage": 100,
+                    "Ec2KeyPair": {
+                        "Ref": "KeyPair"
+                    },
+                    "InstanceRole": {"Ref" : "ECSInstanceProfile"},
+                    "InstanceTypes": [
                         "c5.2xlarge",
                         "c5a.2xlarge",
                         "c5.4xlarge",
                         "c5a.4xlarge"
                     ],
-                    "MaxvCpus" : 512,
-                    "MinvCpus" : 0,
-                    "SecurityGroupIds" : [ {
-                        "Fn::GetAtt": [
-                            "BatchSecurityGroup",
-                            "GroupId"
-                        ]
-                    } ],
-                    "Subnets" : {"Ref" : "Subnets"}
-                  }
+                    "MaxvCpus": 512,
+                    "MinvCpus": 0,
+                    "SecurityGroupIds": [
+                        {
+                            "Fn::GetAtt": [
+                                "BatchSecurityGroup",
+                                "GroupId"
+                            ]
+                        }
+                    ],
+                    "Subnets": {
+                        "Ref": "Subnets"
+                    }
+                }
             }
         },
-        "CellrangerJobQueue":{
-            "Type" : "AWS::Batch::JobQueue",
-            "Properties" : {
-                "ComputeEnvironmentOrder" : [ {
-                    "ComputeEnvironment" : {"Ref" : "1TBgp3ComputeEnv"},
-                    "Order" : 1
-                  } ],
-                "JobQueueName" : "Cellranger",
-                "Priority" : 1,
-                "State" : "ENABLED"
-              }
+        "CellrangerJobQueue": {
+            "Type": "AWS::Batch::JobQueue",
+            "Properties": {
+                "ComputeEnvironmentOrder": [
+                    {
+                        "ComputeEnvironment": {
+                            "Ref": "1TBgp3ComputeEnv"
+                        },
+                        "Order": 1
+                    }
+                ],
+                "JobQueueName": "Cellranger",
+                "Priority": 1,
+                "State": "ENABLED"
+            }
         },
-        "cellSNPJobQueue":{
-            "Type" : "AWS::Batch::JobQueue",
-            "Properties" : {
-                "ComputeEnvironmentOrder" : [ {
-                    "ComputeEnvironment" : {"Ref" : "500GBgp3ComputeEnv"},
-                    "Order" : 1
-                  } ],
-                "JobQueueName" : "cellSNP",
-                "Priority" : 1,
-                "State" : "ENABLED"
-              }
+        "cellSNPJobQueue": {
+            "Type": "AWS::Batch::JobQueue",
+            "Properties": {
+                "ComputeEnvironmentOrder": [
+                    {
+                        "ComputeEnvironment": {
+                            "Ref": "500GBgp3ComputeEnv"
+                        },
+                        "Order": 1
+                    }
+                ],
+                "JobQueueName": "cellSNP",
+                "Priority": 1,
+                "State": "ENABLED"
+            }
         },
-        "SPCJobQueue":{
-            "Type" : "AWS::Batch::JobQueue",
-            "Properties" : {
-                "ComputeEnvironmentOrder" : [ {
-                    "ComputeEnvironment" : {"Ref" : "1TBst1ComputeEnv"},
-                    "Order" : 1
-                  } ],
-                "JobQueueName" : "SPC",
-                "Priority" : 1,
-                "State" : "ENABLED"
-              }
+        "SPCJobQueue": {
+            "Type": "AWS::Batch::JobQueue",
+            "Properties": {
+                "ComputeEnvironmentOrder": [
+                    {
+                        "ComputeEnvironment": {
+                            "Ref": "1TBst1ComputeEnv"
+                        },
+                        "Order": 1
+                    }
+                ],
+                "JobQueueName": "SPC",
+                "Priority": 1,
+                "State": "ENABLED"
+            }
         },
-        "vireoSNPJobQueue":{
-            "Type" : "AWS::Batch::JobQueue",
-            "Properties" : {
-                "ComputeEnvironmentOrder" : [ {
-                    "ComputeEnvironment" : {"Ref" : "DefaultComputeEnv"},
-                    "Order" : 1
-                  } ],
-                "JobQueueName" : "vireoSNP",
-                "Priority" : 1,
-                "State" : "ENABLED"
-              }
+        "vireoSNPJobQueue": {
+            "Type": "AWS::Batch::JobQueue",
+            "Properties": {
+                "ComputeEnvironmentOrder": [
+                    {
+                        "ComputeEnvironment": {
+                            "Ref": "DefaultComputeEnv"
+                        },
+                        "Order": 1
+                    }
+                ],
+                "JobQueueName": "vireoSNP",
+                "Priority": 1,
+                "State": "ENABLED"
+            }
         },
-        "CellrangerJobDef":{
-            "Type" : "AWS::Batch::JobDefinition",
-            "Properties" : {
-                "ContainerProperties" : {
-                    "Image": {"Ref" : "CellrangerImage"},
+        "CellrangerJobDef": {
+            "Type": "AWS::Batch::JobDefinition",
+            "Properties": {
+                "ContainerProperties": {
+                    "Image": {
+                        "Ref": "CellrangerImage"
+                    },
                     "Command": [
                         "bash",
                         "command.sh"
@@ -397,21 +613,27 @@
                         }
                     ]
                 },
-                "JobDefinitionName" : "Cellranger_def",
-                "PlatformCapabilities" : [ "EC2" ],
-                "PropagateTags" : false,
-                "RetryStrategy" : {
-                    "Attempts" : 5
+                "JobDefinitionName": "Cellranger_def",
+                "PlatformCapabilities": [
+                    "EC2"
+                ],
+                "PropagateTags": false,
+                "RetryStrategy": {
+                    "Attempts": 5
                 },
-                "Timeout" : {"AttemptDurationSeconds" : 1296000},
-                "Type" : "container"
-                }
+                "Timeout": {
+                    "AttemptDurationSeconds": 1296000
+                },
+                "Type": "container"
+            }
         },
-        "cellSNPJobDef":{
-            "Type" : "AWS::Batch::JobDefinition",
-            "Properties" : {
-                "ContainerProperties" : {
-                    "Image": {"Ref" : "cellSNPImage"},
+        "cellSNPJobDef": {
+            "Type": "AWS::Batch::JobDefinition",
+            "Properties": {
+                "ContainerProperties": {
+                    "Image": {
+                        "Ref": "cellSNPImage"
+                    },
                     "Command": [
                         "bash",
                         "command.sh"
@@ -444,21 +666,27 @@
                         }
                     ]
                 },
-                "JobDefinitionName" : "cellSNP_def",
-                "PlatformCapabilities" : [ "EC2" ],
-                "PropagateTags" : false,
-                "RetryStrategy" : {
-                    "Attempts" : 5
+                "JobDefinitionName": "cellSNP_def",
+                "PlatformCapabilities": [
+                    "EC2"
+                ],
+                "PropagateTags": false,
+                "RetryStrategy": {
+                    "Attempts": 5
                 },
-                "Timeout" : {"AttemptDurationSeconds" : 1296000},
-                "Type" : "container"
-                }
+                "Timeout": {
+                    "AttemptDurationSeconds": 1296000
+                },
+                "Type": "container"
+            }
         },
-        "SPCJobDef":{
-            "Type" : "AWS::Batch::JobDefinition",
-            "Properties" : {
-                "ContainerProperties" : {
-                    "Image": {"Ref" : "SPCImage"},
+        "SPCJobDef": {
+            "Type": "AWS::Batch::JobDefinition",
+            "Properties": {
+                "ContainerProperties": {
+                    "Image": {
+                        "Ref": "SPCImage"
+                    },
                     "Command": [
                         "bash",
                         "command.sh"
@@ -491,21 +719,27 @@
                         }
                     ]
                 },
-                "JobDefinitionName" : "SPC_def",
-                "PlatformCapabilities" : [ "EC2" ],
-                "PropagateTags" : false,
-                "RetryStrategy" : {
-                    "Attempts" : 5
+                "JobDefinitionName": "SPC_def",
+                "PlatformCapabilities": [
+                    "EC2"
+                ],
+                "PropagateTags": false,
+                "RetryStrategy": {
+                    "Attempts": 5
                 },
-                "Timeout" : {"AttemptDurationSeconds" : 1296000},
-                "Type" : "container"
-                }
+                "Timeout": {
+                    "AttemptDurationSeconds": 1296000
+                },
+                "Type": "container"
+            }
         },
-        "vireoSNPJobDef":{
-            "Type" : "AWS::Batch::JobDefinition",
-            "Properties" : {
-                "ContainerProperties" : {
-                    "Image": {"Ref" : "vireoSNPImage"},
+        "vireoSNPJobDef": {
+            "Type": "AWS::Batch::JobDefinition",
+            "Properties": {
+                "ContainerProperties": {
+                    "Image": {
+                        "Ref": "vireoSNPImage"
+                    },
                     "Command": [
                         "bash",
                         "command.sh"
@@ -523,48 +757,131 @@
                         }
                     ]
                 },
-                "JobDefinitionName" : "vireoSNP_def",
-                "PlatformCapabilities" : [ "EC2" ],
-                "PropagateTags" : false,
-                "RetryStrategy" : {
-                    "Attempts" : 5
+                "JobDefinitionName": "vireoSNP_def",
+                "PlatformCapabilities": [
+                    "EC2"
+                ],
+                "PropagateTags": false,
+                "RetryStrategy": {
+                    "Attempts": 5
                 },
-                "Timeout" : {"AttemptDurationSeconds" : 1296000},
-                "Type" : "container"
-                }
+                "Timeout": {
+                    "AttemptDurationSeconds": 1296000
+                },
+                "Type": "container"
+            }
         },
-        "cellSNPFilter":{
-            "Type" : "AWS::Lambda::Function",
-            "Properties" : {
-                "Code" : {"ZipFile":"def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellranger-result-bucket'\n    upload_bucket = 'cellsnp-original-result'\n    threads = '22'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    min_MAF = ''\n    min_count = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    n_donor = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'min_MAF':\n            min_MAF = env['Value']\n        elif env['Name'] == 'min_count':\n            min_count = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n        elif env['Name'] == 'n_donor':\n            n_donor = env['Value']\n    return {\n    'sample_id': sample_id,\n    'min_MAF': min_MAF,\n    'min_count': min_count,\n    'download_bucket':download_bucket,\n    'upload_bucket':upload_bucket,\n    'threads':threads,\n    'n_donor': n_donor,\n    'AWS_KEY': AWS_KEY,\n    'AWS_SECRET_KEY': AWS_SECRET_KEY,\n    'REGION' : REGION\n    }"},
-                "Description" : "Filter outputs from Cellranger Batch job and sends it to cellSNP Batch job",
-                "FunctionName" : "cellSNP_filter_function",
-                "Handler" : "lambda_function.lambda_handler",
-                "Role" : {"Fn::GetAtt" : ["LambdaRole", "Arn"] },
-                "Runtime" : "python3.7"
-                }
+        "cellSNPFilter": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": "def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellranger-result-bucket'\n    upload_bucket = 'cellsnp-original-result'\n    threads = '22'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    min_MAF = ''\n    min_count = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    n_donor = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'min_MAF':\n            min_MAF = env['Value']\n        elif env['Name'] == 'min_count':\n            min_count = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n        elif env['Name'] == 'n_donor':\n            n_donor = env['Value']\n    return {\n    'sample_id': sample_id,\n    'min_MAF': min_MAF,\n    'min_count': min_count,\n    'download_bucket':download_bucket,\n    'upload_bucket':upload_bucket,\n    'threads':threads,\n    'n_donor': n_donor,\n    'AWS_KEY': AWS_KEY,\n    'AWS_SECRET_KEY': AWS_SECRET_KEY,\n    'REGION' : REGION\n    }"
+                },
+                "Description": "Filter outputs from Cellranger Batch job and sends it to cellSNP Batch job",
+                "FunctionName": "cellSNP_filter_function",
+                "Handler": "index.lambda_handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.7"
+            }
         },
-        "SPCFilter":{
-            "Type" : "AWS::Lambda::Function",
-            "Properties" : {
-                "Code" : {"ZipFile":"def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellranger-result-bucket'\n    upload_bucket = 'spc-result-bucket'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    num_clusters = ''\n    threads = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'num_clusters':\n            num_clusters = env['Value']\n        elif env['Name'] == 'SPC_threads':\n            threads = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n    return {\n        'sample_id': sample_id,\n        'download_bucket': download_bucket,\n        'upload_bucket': upload_bucket,\n        'threads': threads,\n        'num_clusters': num_clusters,\n        'AWS_KEY': AWS_KEY,\n        'AWS_SECRET_KEY': AWS_SECRET_KEY,\n        'REGION' : REGION}"},
-                "Description" : "Filter outputs from Cellranger Batch job and sends it to SPC Batch job",
-                "FunctionName" : "SPC_filter_function",
-                "Handler" : "lambda_function.lambda_handler",
-                "Role" : {"Fn::GetAtt" : ["LambdaRole", "Arn"] },
-                "Runtime" : "python3.7"
-                }
+        "SPCFilter": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": "def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellranger-result-bucket'\n    upload_bucket = 'spc-result-bucket'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    num_clusters = ''\n    threads = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'num_clusters':\n            num_clusters = env['Value']\n        elif env['Name'] == 'SPC_threads':\n            threads = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n    return {\n        'sample_id': sample_id,\n        'download_bucket': download_bucket,\n        'upload_bucket': upload_bucket,\n        'threads': threads,\n        'num_clusters': num_clusters,\n        'AWS_KEY': AWS_KEY,\n        'AWS_SECRET_KEY': AWS_SECRET_KEY,\n        'REGION' : REGION}"
+                },
+                "Description": "Filter outputs from Cellranger Batch job and sends it to SPC Batch job",
+                "FunctionName": "SPC_filter_function",
+                "Handler": "index.lambda_handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.7"
+            }
         },
-        "vireoSNPFilter":{
-            "Type" : "AWS::Lambda::Function",
-            "Properties" : {
-                "Code" : {"ZipFile":"def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellsnp-original-result'\n    upload_bucket = 'vireosnp-result'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    n_donor = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'n_donor':\n            n_donor = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n    return {\n        sample_id': sample_id,\n        'n_donor': n_donor,\n        'download_bucket':download_bucket,\n        'upload_bucket':upload_bucket,\n        'AWS_KEY': AWS_KEY,\n        'AWS_SECRET_KEY': AWS_SECRET_KEY,\n        'REGION' : REGION}"},
-                "Description" : "Filter outputs from cellSNP Batch job and sends it to vireoSNP Batch job",
-                "FunctionName" : "vireoSNP_filter_function",
-                "Handler" : "lambda_function.lambda_handler",
-                "Role" : {"Fn::GetAtt" : ["LambdaRole", "Arn"] },
-                "Runtime" : "python3.7"
-                }
+        "vireoSNPFilter": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": "def lambda_handler(event, context):\n    # Fixed Variables\n    download_bucket = 'cellsnp-original-result'\n    upload_bucket = 'vireosnp-result'\n    # Variables from input\n    env_variables = event['Container']['Environment']\n    sample_id = ''\n    n_donor = ''\n    AWS_KEY = ''\n    AWS_SECRET_KEY = ''\n    REGION = ''\n    for env in env_variables:\n        if env['Name'] == 'sample_id':\n            sample_id = env['Value']\n        elif env['Name'] == 'n_donor':\n            n_donor = env['Value']\n        elif env['Name'] == 'AWS_KEY':\n            AWS_KEY = env['Value']\n        elif env['Name'] == 'AWS_SECRET_KEY':\n            AWS_SECRET_KEY = env['Value']\n        elif env['Name'] == 'REGION':\n            REGION = env['Value']\n    return {\n        sample_id': sample_id,\n        'n_donor': n_donor,\n        'download_bucket':download_bucket,\n        'upload_bucket':upload_bucket,\n        'AWS_KEY': AWS_KEY,\n        'AWS_SECRET_KEY': AWS_SECRET_KEY,\n        'REGION' : REGION}"
+                },
+                "Description": "Filter outputs from cellSNP Batch job and sends it to vireoSNP Batch job",
+                "FunctionName": "vireoSNP_filter_function",
+                "Handler": "index.lambda_handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.7"
+            }
+        },
+        "StateMachine": {
+            "Type": "AWS::StepFunctions::StateMachine",
+            "Properties": {
+                "DefinitionString": "{\"Comment\": \"Single Cell sequencing pipeline's state machine\",\"StartAt\": \"Cell Ranger\",\"States\": {\"Cell Ranger\": {\"Type\": \"Task\",\"Resource\": \"arn:aws:states:::batch:submitJob.sync\",\"Parameters\": {\"JobDefinition\": \"${Cellranger_def_arn}\",\"JobName.$\": \"$.sample_id\",\"JobQueue\": \"${Cellranger_jq_arn}\",\"ContainerOverrides\": {\"Environment\": [{\"Name\": \"AWS_KEY\",\"Value.$\": \"$.AWS_KEY\"},{\"Name\": \"AWS_SECRET_KEY\",\"Value.$\": \"$.AWS_SECRET_KEY\"},{\"Name\": \"REGION\",\"Value.$\": \"$.REGION\"},{\"Name\": \"download_bucket\",\"Value.$\": \"$.download_bucket\"},{\"Name\": \"upload_bucket\",\"Value.$\": \"$.upload_bucket\"},{\"Name\": \"sample_id\",\"Value.$\": \"$.sample_id\"},{\"Name\": \"core\",\"Value.$\": \"$.core\"},{\"Name\": \"memory\",\"Value.$\": \"$.memory\"},{\"Name\": \"expect_cells\",\"Value.$\": \"$.expect_cells\"},{\"Name\": \"threads\",\"Value.$\": \"$.threads\"},{\"Name\": \"SPC_threads\",\"Value.$\": \"$.SPC_threads\"},{\"Name\": \"min_MAF\",\"Value.$\": \"$.min_MAF\"},{\"Name\": \"min_count\",\"Value.$\": \"$.min_count\"},{\"Name\": \"n_donor\",\"Value.$\": \"$.n_donor\"},{\"Name\": \"num_clusters\",\"Value.$\": \"$.num_clusters\"}]}},\"Next\": \"Parallel\"},\"Parallel\": {\"Type\": \"Parallel\",\"Branches\": [{\"StartAt\": \"filter_1\",\"States\": {\"filter_1\": {\"Type\": \"Task\",\"Resource\": \"${cellSNP_filter_arn}\",\"Next\": \"CellSNP\"},\"CellSNP\": {\"Type\": \"Task\",\"Resource\": \"arn:aws:states:::batch:submitJob.sync\",\"Parameters\": {\"JobDefinition\": \"${cellSNP_def_arn}\",\"JobName.$\": \"$.sample_id\",\"JobQueue\": \"${cellSNP_jq_arn}\",\"ContainerOverrides\": {\"Environment\": [{\"Name\": \"AWS_KEY\",\"Value.$\": \"$.AWS_KEY\"},{\"Name\": \"AWS_SECRET_KEY\",\"Value.$\": \"$.AWS_SECRET_KEY\"},{\"Name\": \"REGION\",\"Value.$\": \"$.REGION\"},{\"Name\": \"download_bucket\",\"Value.$\": \"$.download_bucket\"},{\"Name\": \"upload_bucket\",\"Value.$\": \"$.upload_bucket\"},{\"Name\": \"sample_id\",\"Value.$\": \"$.sample_id\"},{\"Name\": \"threads\",\"Value.$\": \"$.threads\"},{\"Name\": \"min_MAF\",\"Value.$\": \"$.min_MAF\"},{\"Name\": \"min_count\",\"Value.$\": \"$.min_count\"},{\"Name\": \"n_donor\",\"Value.$\": \"$.n_donor\"}]}},\"Next\": \"filter_2\"},\"filter_2\": {\"Type\": \"Task\",\"Resource\": \"${vireoSNP_filter_arn}\",\"Next\": \"VireoSNP\"},\"VireoSNP\": {\"Type\": \"Task\",\"Resource\": \"arn:aws:states:::batch:submitJob.sync\",\"Parameters\": {\"JobDefinition\": \"${vireoSNP_def_arn}\",\"JobName.$\": \"$.sample_id\",\"JobQueue\": \"${vireoSNP_jq_arn}\",\"ContainerOverrides\": {\"Environment\": [{\"Name\": \"AWS_KEY\",\"Value.$\": \"$.AWS_KEY\"},{\"Name\": \"AWS_SECRET_KEY\",\"Value.$\": \"$.AWS_SECRET_KEY\"},{\"Name\": \"REGION\",\"Value.$\": \"$.REGION\"},{\"Name\": \"download_bucket\",\"Value.$\": \"$.download_bucket\"},{\"Name\": \"upload_bucket\",\"Value.$\": \"$.upload_bucket\"},{\"Name\": \"sample_id\",\"Value.$\": \"$.sample_id\"},{\"Name\": \"n_donor\",\"Value.$\": \"$.n_donor\"}]}},\"End\": true}}},{\"StartAt\": \"filter_3\",\"States\": {\"filter_3\": {\"Type\": \"Task\",\"Resource\": \"${SPC_filter_arn}\",\"Next\": \"SPC\"},\"SPC\": {\"Type\": \"Task\",\"Resource\": \"arn:aws:states:::batch:submitJob.sync\",\"Parameters\": {\"JobDefinition\": \"${SPC_def_arn}\",\"JobName.$\": \"$.sample_id\",\"JobQueue\": \"${SPC_jq_arn}\",\"ContainerOverrides\": {\"Environment\": [{\"Name\": \"AWS_KEY\",\"Value.$\": \"$.AWS_KEY\"},{\"Name\": \"AWS_SECRET_KEY\",\"Value.$\": \"$.AWS_SECRET_KEY\"},{\"Name\": \"REGION\",\"Value.$\": \"$.REGION\"},{\"Name\": \"download_bucket\",\"Value.$\": \"$.download_bucket\"},{\"Name\": \"upload_bucket\",\"Value.$\": \"$.upload_bucket\"},{\"Name\": \"sample_id\",\"Value.$\": \"$.sample_id\"},{\"Name\": \"threads\",\"Value.$\": \"$.threads\"},{\"Name\": \"num_clusters\",\"Value.$\": \"$.num_clusters\"}]}},\"End\": true}}}],\"End\": true}}}",
+                "DefinitionSubstitutions": {
+                    "Cellranger_def_arn": {
+                        "Ref": "CellrangerJobDef"
+                    },
+                    "Cellranger_jq_arn": {
+                        "Ref": "CellrangerJobQueue"
+                    },
+                    "cellSNP_filter_arn": {
+                        "Fn::GetAtt": [
+                            "cellSNPFilter",
+                            "Arn"
+                        ]
+                    },
+                    "cellSNP_def_arn": {
+                        "Ref": "cellSNPJobDef"
+                    },
+                    "cellSNP_jq_arn": {
+                        "Ref": "cellSNPJobQueue"
+                    },
+                    "vireoSNP_filter_arn": {
+                        "Fn::GetAtt": [
+                            "vireoSNPFilter",
+                            "Arn"
+                        ]
+                    },
+                    "vireoSNP_def_arn": {
+                        "Ref": "vireoSNPJobDef"
+                    },
+                    "vireoSNP_jq_arn": {
+                        "Ref": "vireoSNPJobQueue"
+                    },
+                    "SPC_filter_arn": {
+                        "Fn::GetAtt": [
+                            "SPCFilter",
+                            "Arn"
+                        ]
+                    },
+                    "SPC_def_arn": {
+                        "Ref": "SPCJobDef"
+                    },
+                    "SPC_jq_arn": {
+                        "Ref": "SPCJobQueue"
+                    }
+                },
+                "RoleArn": {
+                    "Fn::GetAtt": [
+                        "StepFunctionsRole",
+                        "Arn"
+                    ]
+                },
+                "StateMachineName": "Single_Cell_Sequencing_Pipeline",
+                "StateMachineType": "STANDARD"
+            }
         }
     }
 }

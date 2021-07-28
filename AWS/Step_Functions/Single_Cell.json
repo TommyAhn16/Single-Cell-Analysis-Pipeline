@@ -6,11 +6,23 @@
         "Type": "Task",
         "Resource": "arn:aws:states:::batch:submitJob.sync",
         "Parameters": {
-          "JobDefinition": "arn:aws:batch:ap-northeast-2:901858906361:job-definition/Cellranger:4",
+          "JobDefinition": "${Cellranger_def_arn}",
           "JobName.$": "$.sample_id",
-          "JobQueue": "arn:aws:batch:ap-northeast-2:901858906361:job-queue/CellRanger_500GB",
+          "JobQueue": "${Cellranger_jq_arn}",
           "ContainerOverrides": {
             "Environment": [
+              {
+                "Name": "AWS_KEY",
+                "Value.$": "$.AWS_KEY"
+              },
+              {
+                "Name": "AWS_SECRET_KEY",
+                "Value.$": "$.AWS_SECRET_KEY"
+              },
+              {
+                "Name": "REGION",
+                "Value.$": "$.REGION"
+              },
               {
                 "Name": "download_bucket",
                 "Value.$": "$.download_bucket"
@@ -40,6 +52,10 @@
                 "Value.$": "$.threads"
               },
               {
+                "Name": "SPC_threads",
+                "Value.$": "$.SPC_threads"
+              },
+              {
                 "Name": "min_MAF",
                 "Value.$": "$.min_MAF"
               },
@@ -50,6 +66,10 @@
               {
                 "Name": "n_donor",
                 "Value.$": "$.n_donor"
+              },
+              {
+                "Name": "num_clusters",
+                "Value.$": "$.num_clusters"
               }
             ]
           }
@@ -64,18 +84,30 @@
             "States": {
               "filter_1": {
                 "Type": "Task",
-                "Resource": "arn:aws:lambda:ap-northeast-2:901858906361:function:cellSNP_filter",
+                "Resource": "${cellSNP_filter_arn}",
                 "Next": "CellSNP"
               },
               "CellSNP": {
                 "Type": "Task",
                 "Resource": "arn:aws:states:::batch:submitJob.sync",
                 "Parameters": {
-                  "JobDefinition": "arn:aws:batch:ap-northeast-2:901858906361:job-definition/cellSNP:1",
+                  "JobDefinition": "${cellSNP_def_arn}",
                   "JobName.$": "$.sample_id",
-                  "JobQueue": "arn:aws:batch:ap-northeast-2:901858906361:job-queue/CellSNP_Spot",
+                  "JobQueue": "${cellSNP_jq_arn}",
                   "ContainerOverrides": {
                     "Environment": [
+                      {
+                        "Name": "AWS_KEY",
+                        "Value.$": "$.AWS_KEY"
+                      },
+                      {
+                        "Name": "AWS_SECRET_KEY",
+                        "Value.$": "$.AWS_SECRET_KEY"
+                      },
+                      {
+                        "Name": "REGION",
+                        "Value.$": "$.REGION"
+                      },
                       {
                         "Name": "download_bucket",
                         "Value.$": "$.download_bucket"
@@ -111,18 +143,30 @@
               },
               "filter_2": {
                 "Type": "Task",
-                "Resource": "arn:aws:lambda:ap-northeast-2:901858906361:function:vireoSNP",
+                "Resource": "${vireoSNP_filter_arn}",
                 "Next": "VireoSNP"
               },
               "VireoSNP": {
                 "Type": "Task",
                 "Resource": "arn:aws:states:::batch:submitJob.sync",
                 "Parameters": {
-                  "JobDefinition": "arn:aws:batch:ap-northeast-2:901858906361:job-definition/Vireosnp:4",
+                  "JobDefinition": "${vireoSNP_def_arn}",
                   "JobName.$": "$.sample_id",
-                  "JobQueue": "arn:aws:batch:ap-northeast-2:901858906361:job-queue/VireoSNP",
+                  "JobQueue": "${vireoSNP_jq_arn}",
                   "ContainerOverrides": {
                     "Environment": [
+                      {
+                        "Name": "AWS_KEY",
+                        "Value.$": "$.AWS_KEY"
+                      },
+                      {
+                        "Name": "AWS_SECRET_KEY",
+                        "Value.$": "$.AWS_SECRET_KEY"
+                      },
+                      {
+                        "Name": "REGION",
+                        "Value.$": "$.REGION"
+                      },
                       {
                         "Name": "download_bucket",
                         "Value.$": "$.download_bucket"
@@ -151,18 +195,30 @@
             "States": {
               "filter_3": {
                 "Type": "Task",
-                "Resource": "arn:aws:lambda:ap-northeast-2:901858906361:function:Souporcell_filter",
+                "Resource": "${SPC_filter_arn}",
                 "Next": "SPC"
               },
               "SPC": {
                 "Type": "Task",
                 "Resource": "arn:aws:states:::batch:submitJob.sync",
                 "Parameters": {
-                  "JobDefinition": "arn:aws:batch:ap-northeast-2:901858906361:job-definition/Souporcell:4",
+                  "JobDefinition": "${SPC_def_arn}",
                   "JobName.$": "$.sample_id",
-                  "JobQueue": "arn:aws:batch:ap-northeast-2:901858906361:job-queue/SPC",
+                  "JobQueue": "${SPC_jq_arn}",
                   "ContainerOverrides": {
                     "Environment": [
+                      {
+                        "Name": "AWS_KEY",
+                        "Value.$": "$.AWS_KEY"
+                      },
+                      {
+                        "Name": "AWS_SECRET_KEY",
+                        "Value.$": "$.AWS_SECRET_KEY"
+                      },
+                      {
+                        "Name": "REGION",
+                        "Value.$": "$.REGION"
+                      },
                       {
                         "Name": "download_bucket",
                         "Value.$": "$.download_bucket"
@@ -180,16 +236,8 @@
                         "Value.$": "$.threads"
                       },
                       {
-                        "Name": "min_MAF",
-                        "Value.$": "$.min_MAF"
-                      },
-                      {
-                        "Name": "min_count",
-                        "Value.$": "$.min_count"
-                      },
-                      {
-                        "Name": "n_donor",
-                        "Value.$": "$.n_donor"
+                        "Name": "num_clusters",
+                        "Value.$": "$.num_clusters"
                       }
                     ]
                   }

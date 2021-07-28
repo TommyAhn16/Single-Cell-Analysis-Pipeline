@@ -2,7 +2,6 @@ def lambda_handler(event, context):
     # Fixed Variables
     download_bucket = "cellsnp-original-result"
     upload_bucket = "vireosnp-result"
-    
 
     # Variables from input
     env_variables = event["Container"]["Environment"]
@@ -25,11 +24,11 @@ def lambda_handler(event, context):
             REGION = env["Value"]
 
     return {
-    "sample_id": sample_id,
-    "n_donor": n_donor,
-    "download_bucket":download_bucket,
-    "upload_bucket":upload_bucket,
-    "AWS_KEY": AWS_KEY,
-    "AWS_SECRET_KEY": AWS_SECRET_KEY,
-    "REGION" : REGION
+        "sample_id": sample_id,
+        "n_donor": n_donor,
+        "download_bucket": download_bucket,
+        "upload_bucket": upload_bucket,
+        "AWS_KEY": AWS_KEY,
+        "AWS_SECRET_KEY": AWS_SECRET_KEY,
+        "REGION": REGION
     }
