@@ -986,7 +986,7 @@
                         ]
                     ]
                 },
-                "Handler": "lambda_function.lambda_handler",
+                "Handler": "cellSNP_filter.lambda_handler",
                 "Role": {
                     "Fn::GetAtt": [
                         "LambdaRole",
@@ -1015,7 +1015,7 @@
                         ]
                     ]
                 },
-                "Handler": "lambda_function.lambda_handler",
+                "Handler": "SPC_filter.lambda_handler",
                 "Role": {
                     "Fn::GetAtt": [
                         "LambdaRole",
@@ -1044,7 +1044,7 @@
                         ]
                     ]
                 },
-                "Handler": "lambda_function.lambda_handler",
+                "Handler": "vireoSNP_filter.lambda_handler",
                 "Role": {
                     "Fn::GetAtt": [
                         "LambdaRole",
