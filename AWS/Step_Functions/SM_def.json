@@ -24,52 +24,64 @@
                 "Value.$": "$.REGION"
               },
               {
-                "Name": "download_bucket",
-                "Value.$": "$.download_bucket"
+                "Name": "SAMPLE_ID",
+                "Value.$": "$.SAMPLE_ID"
               },
               {
-                "Name": "upload_bucket",
-                "Value.$": "$.upload_bucket"
+                "Name": "DOWNLOAD_BUCKET",
+                "Value.$": "$.CR_DOWNLOAD_BUCKET"
               },
               {
-                "Name": "sample_id",
-                "Value.$": "$.sample_id"
+                "Name": "UPLOAD_BUCKET",
+                "Value.$": "$.CR_UPLOAD_BUCKET"
               },
               {
-                "Name": "core",
-                "Value.$": "$.core"
+                "Name": "CORE",
+                "Value.$": "$.CR_CORE"
               },
               {
-                "Name": "memory",
-                "Value.$": "$.memory"
+                "Name": "MEMORY",
+                "Value.$": "$.CR_MEMORY"
               },
               {
-                "Name": "expect_cells",
-                "Value.$": "$.expect_cells"
+                "Name": "EXPECT_CELLS",
+                "Value.$": "$.CR_EXPECT_CELLS"
               },
               {
-                "Name": "threads",
-                "Value.$": "$.threads"
+                "Name": "CS_UPLOAD_BUCKET",
+                "Value.$": "$.CS_UPLOAD_BUCKET"
               },
               {
-                "Name": "SPC_threads",
-                "Value.$": "$.SPC_threads"
+                "Name": "CS_THREADS",
+                "Value.$": "$.CS_THREADS"
               },
               {
-                "Name": "min_MAF",
-                "Value.$": "$.min_MAF"
+                "Name": "CS_MIN_MAF",
+                "Value.$": "$.CS_MIN_MAF"
               },
               {
-                "Name": "min_count",
-                "Value.$": "$.min_count"
+                "Name": "CS_MIN_COUNT",
+                "Value.$": "$.CS_MIN_COUNT"
               },
               {
-                "Name": "n_donor",
-                "Value.$": "$.n_donor"
+                "Name": "VS_UPLOAD_BUCKET",
+                "Value.$": "$.VS_UPLOAD_BUCKET"
               },
               {
-                "Name": "num_clusters",
-                "Value.$": "$.num_clusters"
+                "Name": "VS_N_DONOR",
+                "Value.$": "$.VS_N_DONOR"
+              },
+              {
+                "Name": "SPC_UPLOAD_BUCKET",
+                "Value.$": "$.SPC_UPLOAD_BUCKET"
+              },
+              {
+                "Name": "SPC_THREADS",
+                "Value.$": "$.SPC_THREADS"
+              },
+              {
+                "Name": "SPC_NUM_CLUSTERS",
+                "Value.$": "$.SPC_NUM_CLUSTERS"
               }
             ]
           }
@@ -109,32 +121,36 @@
                         "Value.$": "$.REGION"
                       },
                       {
-                        "Name": "download_bucket",
-                        "Value.$": "$.download_bucket"
+                        "Name": "SAMPLE_ID",
+                        "Value.$": "$.SAMPLE_ID"
                       },
                       {
-                        "Name": "upload_bucket",
-                        "Value.$": "$.upload_bucket"
+                        "Name": "DOWNLOAD_BUCKET",
+                        "Value.$": "$.DOWNLOAD_BUCKET"
                       },
                       {
-                        "Name": "sample_id",
-                        "Value.$": "$.sample_id"
+                        "Name": "UPLOAD_BUCKET",
+                        "Value.$": "$.UPLOAD_BUCKET"
                       },
                       {
-                        "Name": "threads",
-                        "Value.$": "$.threads"
+                        "Name": "THREADS",
+                        "Value.$": "$.THREADS"
                       },
                       {
-                        "Name": "min_MAF",
-                        "Value.$": "$.min_MAF"
+                        "Name": "MIN_MAF",
+                        "Value.$": "$.MIN_MAF"
                       },
                       {
-                        "Name": "min_count",
-                        "Value.$": "$.min_count"
+                        "Name": "MIN_COUNT",
+                        "Value.$": "$.MIN_COUNT"
                       },
                       {
-                        "Name": "n_donor",
-                        "Value.$": "$.n_donor"
+                        "Name": "VS_UPLOAD_BUCKET",
+                        "Value.$": "$.VS_UPLOAD_BUCKET"
+                      },
+                      {
+                        "Name": "VS_N_DONOR",
+                        "Value.$": "$.VS_N_DONOR"
                       }
                     ]
                   }
@@ -168,20 +184,20 @@
                         "Value.$": "$.REGION"
                       },
                       {
-                        "Name": "download_bucket",
-                        "Value.$": "$.download_bucket"
+                        "Name": "SAMPLE_ID",
+                        "Value.$": "$.SAMPLE_ID"
                       },
                       {
-                        "Name": "upload_bucket",
-                        "Value.$": "$.upload_bucket"
+                        "Name": "DOWNLOAD_BUCKET",
+                        "Value.$": "$.DOWNLOAD_BUCKET"
                       },
                       {
-                        "Name": "sample_id",
-                        "Value.$": "$.sample_id"
+                        "Name": "UPLOAD_BUCKET",
+                        "Value.$": "$.UPLOAD_BUCKET"
                       },
                       {
-                        "Name": "n_donor",
-                        "Value.$": "$.n_donor"
+                        "Name": "N_DONOR",
+                        "Value.$": "$.N_DONOR"
                       }
                     ]
                   }
@@ -220,24 +236,24 @@
                         "Value.$": "$.REGION"
                       },
                       {
-                        "Name": "download_bucket",
-                        "Value.$": "$.download_bucket"
+                        "Name": "SAMPLE_ID",
+                        "Value.$": "$.SAMPLE_ID"
                       },
                       {
-                        "Name": "upload_bucket",
-                        "Value.$": "$.upload_bucket"
+                        "Name": "DOWNLOAD_BUCKET",
+                        "Value.$": "$.CR_DOWNLOAD_BUCKET"
                       },
                       {
-                        "Name": "sample_id",
-                        "Value.$": "$.sample_id"
+                        "Name": "UPLOAD_BUCKET",
+                        "Value.$": "$.CR_UPLOAD_BUCKET"
                       },
                       {
-                        "Name": "threads",
-                        "Value.$": "$.threads"
+                        "Name": "THREADS",
+                        "Value.$": "$.THREADS"
                       },
                       {
-                        "Name": "num_clusters",
-                        "Value.$": "$.num_clusters"
+                        "Name": "NUM_CLUSTERS",
+                        "Value.$": "$.NUM_CLUSTERS"
                       }
                     ]
                   }

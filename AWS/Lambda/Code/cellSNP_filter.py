@@ -36,6 +36,8 @@ def lambda_handler(event, context):
             MIN_COUNT = env["Value"]
         elif env["Name"] == "VS_N_DONOR":
             VS_N_DONOR = env["Value"]
+        elif env["Name"] == "VS_UPLOAD_BUCKET":
+            VS_UPLOAD_BUCKET = env["Value"]
 
     return {
         "SAMPLE_ID": SAMPLE_ID,
