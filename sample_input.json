@@ -1,0 +1,20 @@
+{
+    "AWS_KEY" : "",
+    "AWS_SECRET_KEY": "",
+    "REGION": "ap-northeast-2",
+    "SAMPLE_ID": "SCP17-GEX",
+    "CR_DOWNLOAD_BUCKET": "cellranger-input-bucket",
+    "CR_UPLOAD_BUCKET": "cellranger-result-bucket",
+    "CR_CORE": "4",
+    "CR_MEMORY": "50",
+    "CR_EXPECT_CELLS": "24000",
+    "CS_UPLOAD_BUCKET" : "",
+    "CS_THREADS": "22",
+    "CS_MIN_MAF": "0.1",
+    "CS_MIN_COUNT": "100",
+    "VS_UPLOAD_BUCKET" : "",
+    "VS_N_DONOR": "4",
+    "SPC_UPLOAD_BUCKET" : "",
+    "SPC_THREADS" : "4",
+    "SPC_NUM_CLUSTERS" : "4"
+}
