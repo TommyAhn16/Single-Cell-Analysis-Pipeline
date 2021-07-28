@@ -3,11 +3,11 @@ import subprocess
 import sys
 
 # Env variables
-sample_id = os.environ['sample_id']
-download_bucket = os.environ['download_bucket']
-upload_bucket = os.environ['upload_bucket']
-threads = os.environ['threads']  # 4
-num_clusters = os.environ['num_clusters']  # 4
+sample_id = os.environ['SAMPLE_ID']
+download_bucket = os.environ['DOWNLOAD_BUCKET']
+upload_bucket = os.environ['UPLOAD_BUCKET']
+threads = os.environ['THREADS']  # 4
+num_clusters = os.environ['NUM_CLUSTERS']  # 4
 
 # Variables
 home_dir = "/home/ec2-user"

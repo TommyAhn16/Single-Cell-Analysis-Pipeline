@@ -3,12 +3,12 @@ import subprocess
 import sys
 
 # Env variables
-sample_id = os.environ['sample_id']
-download_bucket = os.environ['download_bucket']
-upload_bucket = os.environ['upload_bucket']
-threads = os.environ['threads']  # 22
-min_MAF = os.environ['min_MAF']  # 0.1
-min_count = os.environ['min_count']  # 100
+sample_id = os.environ['SAMPLE_ID']
+download_bucket = os.environ['DOWNLOAD_BUCKET']
+upload_bucket = os.environ['UPLOAD_BUCKET']
+threads = os.environ['THREADS']  # 22
+min_MAF = os.environ['MIN_MAF']  # 0.1
+min_count = os.environ['MIN_COUNT']  # 100
 
 # Variables
 home_dir = "/home/ec2-user"

@@ -10,7 +10,7 @@ RUN chmod +x ./command.sh && \
     yum install -y unzip && \
     # Download Python and required packages
     yum install -y python3.7 && \
-    pip3 install cellSNP==0.3.2 &&\
+    pip3 install --no-cache-dir cellSNP==0.3.2 &&\
     # Download AWS CLI 2 (latest version)
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip ./awscliv2.zip && \

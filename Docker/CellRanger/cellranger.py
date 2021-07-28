@@ -4,12 +4,12 @@ import subprocess
 import sys
 
 # Env variables
-download_bucket = os.environ['download_bucket']
-upload_bucket = os.environ['upload_bucket']
-sample_id = os.environ['sample_id']
-core = os.environ['core']
-memory = os.environ['memory']
-expect_cells = os.environ['expect_cells']
+download_bucket = os.environ['DOWNLOAD_BUCKET']
+upload_bucket = os.environ['UPLOAD_BUCKET']
+sample_id = os.environ['SAMPLE_ID']
+core = os.environ['CORE']
+memory = os.environ['MEMORY']
+expect_cells = os.environ['EXPECT_CELLS']
 
 # Variables
 sample_file_path = os.path.join(os.getcwd(), f"{sample_id}_samples")

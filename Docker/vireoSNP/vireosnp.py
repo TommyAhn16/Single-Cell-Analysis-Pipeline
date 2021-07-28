@@ -5,10 +5,10 @@ from subprocess import CalledProcessError
 import sys
 
 # Env variables
-sample_id = os.environ['sample_id']
-download_bucket = os.environ['download_bucket']
-upload_bucket = os.environ['upload_bucket']
-n_donor = os.environ['n_donor']
+sample_id = os.environ['SAMPLE_ID']
+download_bucket = os.environ['DOWNLOAD_BUCKET']
+upload_bucket = os.environ['UPLOAD_BUCKET']
+n_donor = os.environ['N_DONOR']
 
 # Function to run shell commands
 
