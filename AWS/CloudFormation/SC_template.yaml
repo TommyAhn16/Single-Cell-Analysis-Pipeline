@@ -1,3 +1,4 @@
+AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   PipelineName:
     Type: String
@@ -501,3 +502,7 @@ Resources:
       RoleArn: !GetAtt StepFunctionsRole.Arn
       StateMachineName: !Join [ "_", [ !Ref PipelineName, Pipeline] ] 
       StateMachineType: STANDARD
+Outputs:
+  StateMachineARN:
+    Description: ARN of the main pipeline state machine
+    Value: !Ref StateMachine
