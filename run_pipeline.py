@@ -22,7 +22,12 @@ def main():
         print("Missing one or more required variables")
         print(f"Missing variables: {', '.join(list(req_var - input_file_keys))}")
         return
-
+    
+    if not options.sm_arn:
+        print("Missing [-a --state-machine-arn] option")
+        print("Usage: run_pipeline.py -i <input json file> -a <state machine AWS ARN>")
+        return
+        
     SFN_client = boto3.client('stepfunctions')
     response = SFN_client.start_execution(
                 stateMachineArn=options.sm_arn,
