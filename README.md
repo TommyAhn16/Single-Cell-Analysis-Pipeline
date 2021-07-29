@@ -13,7 +13,7 @@
 
 ### cellSNP
 
-- Docker hub URI: chungwookahn/cell_snp:0.1
+- Docker hub URI: chungwookahn/cell_snp:0.1.1
 - Version: 0.3.2
 - [source code](https://github.com/single-cell-genetics/cellSNP)
 - pileup whole chromosome(s) for a single BAM/SAM file
