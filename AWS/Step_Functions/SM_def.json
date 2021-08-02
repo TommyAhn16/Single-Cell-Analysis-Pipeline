@@ -241,11 +241,11 @@
                       },
                       {
                         "Name": "DOWNLOAD_BUCKET",
-                        "Value.$": "$.CR_DOWNLOAD_BUCKET"
+                        "Value.$": "$.DOWNLOAD_BUCKET"
                       },
                       {
                         "Name": "UPLOAD_BUCKET",
-                        "Value.$": "$.CR_UPLOAD_BUCKET"
+                        "Value.$": "$.UPLOAD_BUCKET"
                       },
                       {
                         "Name": "THREADS",
