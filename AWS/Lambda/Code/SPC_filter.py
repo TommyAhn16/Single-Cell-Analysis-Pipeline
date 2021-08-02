@@ -21,7 +21,7 @@ def lambda_handler(event, context):
             AWS_SECRET_KEY = env["Value"]
         elif env["Name"] == "REGION":
             REGION = env["Value"]
-        elif env["Name"] == "CR_UPLOAD_BUCKET":
+        elif env["Name"] == "UPLOAD_BUCKET":
             DOWNLOAD_BUCKET = env["Value"]
         elif env["Name"] == "SPC_UPLOAD_BUCKET":
             UPLOAD_BUCKET = env["Value"]

@@ -7,7 +7,7 @@
         "Resource": "arn:aws:states:::batch:submitJob.sync",
         "Parameters": {
           "JobDefinition": "${Cellranger_def_arn}",
-          "JobName.$": "$.sample_id",
+          "JobName.$": "$.SAMPLE_ID",
           "JobQueue": "${Cellranger_jq_arn}",
           "ContainerOverrides": {
             "Environment": [
@@ -104,7 +104,7 @@
                 "Resource": "arn:aws:states:::batch:submitJob.sync",
                 "Parameters": {
                   "JobDefinition": "${cellSNP_def_arn}",
-                  "JobName.$": "$.sample_id",
+                  "JobName.$": "$.SAMPLE_ID",
                   "JobQueue": "${cellSNP_jq_arn}",
                   "ContainerOverrides": {
                     "Environment": [
@@ -167,7 +167,7 @@
                 "Resource": "arn:aws:states:::batch:submitJob.sync",
                 "Parameters": {
                   "JobDefinition": "${vireoSNP_def_arn}",
-                  "JobName.$": "$.sample_id",
+                  "JobName.$": "$.SAMPLE_ID",
                   "JobQueue": "${vireoSNP_jq_arn}",
                   "ContainerOverrides": {
                     "Environment": [
@@ -219,7 +219,7 @@
                 "Resource": "arn:aws:states:::batch:submitJob.sync",
                 "Parameters": {
                   "JobDefinition": "${SPC_def_arn}",
-                  "JobName.$": "$.sample_id",
+                  "JobName.$": "$.SAMPLE_ID",
                   "JobQueue": "${SPC_jq_arn}",
                   "ContainerOverrides": {
                     "Environment": [
