@@ -144,8 +144,22 @@ Resources:
               DeleteOnTermination: true
               VolumeSize: 500
               VolumeType: gp3
-        UserData: >-
-          TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
+        UserData: 
+          !Base64 |
+            MIME-Version: 1.0
+            Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+            --==MYBOUNDARY==
+            Content-Type: text/x-shellscript; charset="us-ascii"
+
+            #!/bin/bash
+            yum -y install util-linux
+            yum -y install xfsprogs 
+            mkdir /vol_mnt
+            mkfs -t xfs /dev/nvme1n1
+            mount /dev/nvme1n1 /vol_mnt
+
+            --==MYBOUNDARY==--
       LaunchTemplateName: !Join [ "_", [ !Ref PipelineName, 500GB_gp3] ] 
   1TBgp3LaunchTemplate:
     Type: 'AWS::EC2::LaunchTemplate'
@@ -162,8 +176,22 @@ Resources:
               DeleteOnTermination: true
               VolumeSize: 1000
               VolumeType: gp3
-        UserData: >-
-          TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
+        UserData:
+          !Base64 |
+            MIME-Version: 1.0
+            Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+            --==MYBOUNDARY==
+            Content-Type: text/x-shellscript; charset="us-ascii"
+
+            #!/bin/bash
+            yum -y install util-linux
+            yum -y install xfsprogs 
+            mkdir /vol_mnt
+            mkfs -t xfs /dev/nvme1n1
+            mount /dev/nvme1n1 /vol_mnt
+
+            --==MYBOUNDARY==-- 
       LaunchTemplateName: !Join [ "_", [ !Ref PipelineName, 1TB_gp3] ]
   1TBst1LaunchTemplate:
     Type: 'AWS::EC2::LaunchTemplate'
@@ -180,8 +208,22 @@ Resources:
               DeleteOnTermination: true
               VolumeSize: 1000
               VolumeType: st1
-        UserData: >-
-          TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSI9PU1ZQk9VTkRBUlk9PSIKCi0tPT1NWUJPVU5EQVJZPT0KQ29udGVudC1UeXBlOiB0ZXh0L3gtc2hlbGxzY3JpcHQ7IGNoYXJzZXQ9InVzLWFzY2lpIgoKIyEvYmluL2Jhc2gKeXVtIC15IGluc3RhbGwgdXRpbC1saW51eAp5dW0gLXkgaW5zdGFsbCB4ZnNwcm9ncyAKbWtkaXIgL3ZvbF9tbnQKbWtmcyAtdCB4ZnMgL2Rldi9udm1lMW4xCm1vdW50IC9kZXYvbnZtZTFuMSAvdm9sX21udAoKLS09PU1ZQk9VTkRBUlk9PS0t
+        UserData:
+          !Base64 |
+            MIME-Version: 1.0
+            Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+            --==MYBOUNDARY==
+            Content-Type: text/x-shellscript; charset="us-ascii"
+
+            #!/bin/bash
+            yum -y install util-linux
+            yum -y install xfsprogs 
+            mkdir /vol_mnt
+            mkfs -t xfs /dev/nvme1n1
+            mount /dev/nvme1n1 /vol_mnt
+
+            --==MYBOUNDARY==--
       LaunchTemplateName: !Join [ "_", [ !Ref PipelineName, 1TB_st1] ]
   500GBgp3ComputeEnv:
     Type: 'AWS::Batch::ComputeEnvironment'
