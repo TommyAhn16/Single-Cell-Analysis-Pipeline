@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import re
 
 # Env variables
 sample_id = os.environ['SAMPLE_ID']
@@ -44,11 +45,11 @@ for dirpath, dirnames, filenames in os.walk(download_path):
     for file in filenames:
         if file == "possorted_genome_bam.bam":
             bamfile_path = os.path.join(dirpath, file)
-        elif file == "barcodes.tsv.gz":
+        elif file == "barcodes.tsv.gz" and not re.search("raw_feature_bc_matrix",dirpath):
             cmd = f"gunzip {os.path.join(dirpath,file)}"
             run_command(cmd)
             barcode_path = os.path.join(dirpath, "barcodes.tsv")
-        elif file == "barcodes.tsv":
+        elif file == "barcodes.tsv" and not re.search("raw_feature_bc_matrix",dirpath):
             barcode_path = os.path.join(dirpath, file)
 
 # Run main command
