@@ -1,0 +1,44 @@
+# CloudFormation Template Summary
+
+- AWSTemplateFormatVersion:
+  - "2010-09-09"
+- Parameters:
+  - PipelineName: Name of the pipeline (e.g. SC_pipeline)
+  - Subnets: Subnets to use for Batch compute environment
+  - VPC: VPC ID for the pipeline (e.g. vpc-a123baa3)
+  - KeyPair: Name of the EC2 keypair which will be used in the pipeline
+  - CellrangerImage: Cellranger docker image uri
+  - cellSNPImage: cellSNP docker image uri
+  - vireoSNPImage: vireoSNP docker image uri
+  - SPCImage: SPC docker image uri
+  - SMDefBucket: S3 Bucket name of where state machine definition is stored
+  - SMDefKey: Object Key name of state machine definition file (e.g. definition.json)
+  - CodeBucket: S3 Bucket name of where Lambda codes are saved
+- Resources:
+  - LambdaRole: 'AWS::IAM::Role'
+  - BatchServiceLinkedRole: 'AWS::IAM::Role'
+  - ECSInstanceRole: 'AWS::IAM::Role'
+  - ECSInstanceProfile: 'AWS::IAM::InstanceProfile'
+  - StepFunctionsRole: 'AWS::IAM::Role'
+  - BatchSecurityGroup: 'AWS::EC2::SecurityGroup'
+  - 500GBgp3LaunchTemplate: 'AWS::EC2::LaunchTemplate'
+  - 1TBgp3LaunchTemplate: 'AWS::EC2::LaunchTemplate'
+  - 1TBst1LaunchTemplate: 'AWS::EC2::LaunchTemplate'
+  - 500GBgp3ComputeEnv: 'AWS::Batch::ComputeEnvironment'
+  - 1TBgp3ComputeEnv: 'AWS::Batch::ComputeEnvironment'
+  - 1TBst1ComputeEnv: 'AWS::Batch::ComputeEnvironment'
+  - DefaultComputeEnv: 'AWS::Batch::ComputeEnvironment'
+  - CellrangerJobQueue: 'AWS::Batch::JobQueue'
+  - cellSNPJobQueue: 'AWS::Batch::JobQueue'
+  - SPCJobQueue: 'AWS::Batch::JobQueue'
+  - vireoSNPJobQueue: 'AWS::Batch::JobQueue'
+  - CellrangerJobDef: 'AWS::Batch::JobDefinition'
+  - cellSNPJobDef: 'AWS::Batch::JobDefinition'
+  - SPCJobDef: 'AWS::Batch::JobDefinition'
+  - vireoSNPJobDef: 'AWS::Batch::JobDefinition'
+  - cellSNPFilter: 'AWS::Lambda::Function'
+  - SPCFilter: 'AWS::Lambda::Function'
+  - vireoSNPFilter: 'AWS::Lambda::Function'
+  - StateMachine: 'AWS::StepFunctions::StateMachine'
+- Outputs:
+  - StateMachineARN: ARN of the main pipeline state machine
