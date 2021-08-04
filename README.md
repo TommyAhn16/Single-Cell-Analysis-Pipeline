@@ -1,4 +1,11 @@
-# Single-Cell-Analysis
+# Single-Cell-Sequencing-Pipeline
+
+- Overview:
+
+## Usage
+
+1. Make CloudFormation stack by uploading the [template](./AWS/CloudFormation/CF_template.yaml) and providing appropriate [parameters](./AWS/CloudFormation/README.md).
+2.
 
 ## Docker Images
 
