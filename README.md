@@ -5,7 +5,64 @@
 ## Usage
 
 1. Make CloudFormation stack by uploading the [template](./AWS/CloudFormation/CF_template.yaml) and providing appropriate [parameters](./AWS/CloudFormation/README.md).
-2.
+2. Once the stack has been created, obtain the State Machine's ARN from the stack output.
+3. If not already installed, install the AWS CLI version 2 (Linux & Mac)
+
+```bash
+$ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+$ unzip awscliv2.zip
+$ sudo ./aws/install
+```
+
+4. Set configuration
+
+```bash
+$ aws configure
+> AWS Access Key ID [None]: your id
+> AWS Secret Access Key [None]: your key
+> Default region name [None]: your region
+> Default output format [None]: json
+```
+
+5. Make `run_pipeline.py` file executable
+
+```bash
+$ chmod +x run_pipeline.py
+```
+
+6. Prepare an input JSON file to submit to the pipeline. [sample file](./sample_input.json)
+
+- Required variables:
+  - "AWS_KEY" : your aws access key
+  - "AWS_SECRET_KEY": your aws secret key
+  - REGION: your region,
+  - "SAMPLE_ID": sample ID name of the .fastq files
+  - "CR_DOWNLOAD_BUCKET": S3 bucket name where Cellranger input files are stored
+  - "CR_UPLOAD_BUCKET": S3 bucket name where Cellranger result files will be stored
+  - "CR_CORE": Number of cores to operate Cellranger analysis
+  - "CR_MEMORY": Memory in GiB for Cellranger analysis to operate
+  - "CR_EXPECT_CELLS": Number of single cells to expect from the Cellranger analysis
+  - "CS_UPLOAD_BUCKET" : S3 bucket name where cellSNP result files will be stored
+  - "CS_THREADS": Number of threads for cellSNP analysis to operate (enter 22 to analyze all 22 chromosomes)
+  - "CS_MIN_MAF": cellSNP's min MAF
+  - "CS_MIN_COUNT": cellSNP's min count
+  - "VS_UPLOAD_BUCKET" : S3 bucket name where vireoSNP result files will be stored
+  - "VS_N_DONOR": Number of donors for vireoSNP analysis
+  - "SPC_UPLOAD_BUCKET" : S3 bucket name where Souporcell result files will be stored
+  - "SPC_THREADS" : Number of threads for Souporcell
+  - "SPC_NUM_CLUSTERS" : Number of clustuers for Souporcell
+
+7. Run the following command to start the sequencing pipeline
+
+```bash
+$ ./run_pipeline.py -i <json input file> -a <state machine arn>
+```
+
+- example
+
+```bash
+$ ./run_pipeline.py -i input.json -a arn:aws:states:ap-northeast-2:241046885174:stateMachine:SC_TEST_Pipeline
+```
 
 ## Docker Images
 
