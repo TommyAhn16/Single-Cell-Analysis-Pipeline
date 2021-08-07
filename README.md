@@ -6,7 +6,7 @@ Analyzing sequenced single cell raw data requires considerable amount of compute
 
 ## Diagram of the Pipeline
 
-![pipeline overview](./SingleCellPipeline.png)
+![pipeline overview](./etc/SingleCellPipeline.png)
 
 ## Usage
 
