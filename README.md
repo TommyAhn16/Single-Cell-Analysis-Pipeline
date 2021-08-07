@@ -4,6 +4,10 @@
 
 Analyzing sequenced single cell raw data requires considerable amount of compute resource and time. There exists a clear limitation to operate pipelines using only on-premise resources. Deploying the pipeline in AWS helped save cost and time through parallel computing and pay-as-you-go cost model. This repository shows how I integrated AWS services such as Batch, Step Functions, Lambda, EC2, and CloudFormation to form the whole pipeline in AWS.
 
+## Diagram of the Pipeline
+
+![pipeline overview](./SingleCellPipeline.png)
+
 ## Usage
 
 1. Make CloudFormation stack by uploading the [template](./AWS/CloudFormation/CF_template.yaml) and providing appropriate [parameters](./AWS/CloudFormation/README.md).
@@ -54,7 +58,8 @@ $ chmod +x run_pipeline.py
   - "SPC_THREADS" : Number of threads for Souporcell
   - "SPC_NUM_CLUSTERS" : Number of clustuers for Souporcell
 
-7. Run the following command to start the sequencing pipeline
+7. Upload .fastq (raw sequenced )
+8. Run the following command to start the sequencing pipeline
 
 ```bash
 $ ./run_pipeline.py -i <json input file> -a <state machine arn>
