@@ -8,7 +8,7 @@ Analyzing sequenced single cell raw data requires considerable amount of compute
 
 ![pipeline overview](./etc/SingleCellPipeline.png)
 
-## Usage
+## Usages
 
 1. Make CloudFormation stack by uploading the [template](./AWS/CloudFormation/CF_template.yaml) and providing appropriate [parameters](./AWS/CloudFormation/README.md).
 
