@@ -11,7 +11,9 @@ Analyzing sequenced single cell raw data requires considerable amount of compute
 ## Usage
 
 1. Make CloudFormation stack by uploading the [template](./AWS/CloudFormation/CF_template.yaml) and providing appropriate [parameters](./AWS/CloudFormation/README.md).
+
 2. Once the stack has been created, obtain the State Machine's ARN from the stack output.
+
 3. If not already installed, install the AWS CLI version 2 (Linux & Mac)
 
 ```bash
@@ -58,7 +60,8 @@ $ chmod +x run_pipeline.py
   - "SPC_THREADS" : Number of threads for Souporcell
   - "SPC_NUM_CLUSTERS" : Number of clustuers for Souporcell
 
-7. Upload .fastq (raw sequenced )
+7. Upload .fastq (raw sequenced data)
+
 8. Run the following command to start the sequencing pipeline
 
 ```bash
@@ -70,6 +73,11 @@ $ ./run_pipeline.py -i <json input file> -a <state machine arn>
 ```bash
 $ ./run_pipeline.py -i input.json -a arn:aws:states:ap-northeast-2:241046885174:stateMachine:SC_TEST_Pipeline
 ```
+
+9. Monitor the progress through the console via `Step Functions > State machines > [your state machie]`
+
+- Example
+  ![state machine](./etc/StateMachine.png)
 
 ## Docker Images
 
@@ -87,7 +95,7 @@ $ ./run_pipeline.py -i input.json -a arn:aws:states:ap-northeast-2:241046885174:
 - Docker hub URI: chungwookahn/cell_snp:0.1.1
 - Version: 0.3.2
 - [source code](https://github.com/single-cell-genetics/cellSNP)
-- pileup whole chromosome(s) for a single BAM/SAM file
+- Pileup whole chromosome(s) for a single BAM/SAM file to detect single nucleotide polymorphism
 
 ### vireoSNP
 
@@ -99,9 +107,12 @@ $ ./run_pipeline.py -i input.json -a arn:aws:states:ap-northeast-2:241046885174:
 ### Souporcell
 
 - Docker hub URI: chungwookahn/souporcell:0.1
-- Anaconda Installers version: Python 3.8, Anaconda3-2021.05-Linux-x86_64
-- Fasta referance: cellranger 5.0.1 reference
-- minimap2: 2.7-r654
-- vartrix: 1.1.22
-- freebayes: 1.3.1-dirty
-- cargo: 1.53.0 (4369396ce 2021-04-27)
+- [Souporcell Reference Page](https://github.com/wheaton5/souporcell)
+- Souporcell is a method for clustering mixed-genotype scRNAseq experiments by individual
+- Version info
+  - Anaconda Installers version: Python 3.8, Anaconda3-2021.05-Linux-x86_64
+  - Fasta referance: cellranger 5.0.1 reference
+  - minimap2: 2.7-r654
+  - vartrix: 1.1.22
+  - freebayes: 1.3.1-dirty
+  - cargo: 1.53.0 (4369396ce 2021-04-27)
