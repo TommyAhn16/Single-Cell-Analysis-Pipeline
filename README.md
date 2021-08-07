@@ -1,6 +1,8 @@
-# Single-Cell-Sequencing-Pipeline
+# Single-Cell-Analysis-Pipeline
 
-- Overview:
+## Overview
+
+Analyzing sequenced single cell raw data requires considerable amount of compute resource and time. There exists a clear limitation to operate pipelines using only on-premise resources. Deploying the pipeline in AWS helped save cost and time through parallel computing and pay-as-you-go cost model. This repository shows how I integrated AWS services such as Batch, Step Functions, Lambda, EC2, and CloudFormation to form the whole pipeline in AWS.
 
 ## Usage
 
