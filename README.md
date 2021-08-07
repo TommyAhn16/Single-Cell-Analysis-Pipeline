@@ -74,9 +74,9 @@ $ ./run_pipeline.py -i <json input file> -a <state machine arn>
 $ ./run_pipeline.py -i input.json -a arn:aws:states:ap-northeast-2:241046885174:stateMachine:SC_TEST_Pipeline
 ```
 
-9. Monitor the progress through the console via `Step Functions > State machines > [your state machie]`
+9. Monitor the progress through the console via `Step Functions > State machines > [your state machine]`
 
-- Example
+- example
   ![state machine](./etc/StateMachine.png)
 
 ## Docker Images
