@@ -15,7 +15,7 @@ $ aws lambda create-function \
     --function-name cellSNP_filter \
     --runtime python3.7 \
     --zip-file fileb://cellSNP_filter.zip \
-    --handler lambda_function.lambda_handler \
+    --handler cellSNP_filter.lambda_handler \
     --role arn:aws:iam::901858906361:role/lambda_role_for_stepfunction
 ```
 ### vireoSNP_filter
@@ -24,7 +24,7 @@ $ aws lambda create-function \
     --function-name vireoSNP_filter \
     --runtime python3.7 \
     --zip-file fileb://vireoSNP_filter.zip \
-    --handler lambda_function.lambda_handler \
+    --handler vireoSNP_filter.lambda_handler \
     --role arn:aws:iam::901858906361:role/lambda_role_for_stepfunction
 ```
 ### Souporcell_filter
@@ -32,7 +32,7 @@ $ aws lambda create-function \
 $ aws lambda create-function \
     --function-name Souporcell_filter \
     --runtime python3.7 \
-    --zip-file fileb://Souporcell_filter.zip \
-    --handler lambda_function.lambda_handler \
+    --zip-file fileb://SPC_filter.zip \
+    --handler SPC_filter.lambda_handler \
     --role arn:aws:iam::901858906361:role/lambda_role_for_stepfunction
 ```
