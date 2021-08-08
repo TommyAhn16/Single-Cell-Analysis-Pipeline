@@ -62,7 +62,7 @@ $ chmod +x run_pipeline.py
 
 7. Upload .fastq (raw sequenced data)
 
-8. Run the following command to start the sequencing pipeline
+8. Run the following command to start the analysing pipeline
 
 ```bash
 $ ./run_pipeline.py -i <json input file> -a <state machine arn>
