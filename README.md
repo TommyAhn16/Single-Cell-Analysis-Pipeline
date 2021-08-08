@@ -11,6 +11,8 @@ Analyzing sequenced single cell raw data requires considerable amount of compute
 ## Usage
 
 1. Make CloudFormation stack by uploading the [template](./AWS/CloudFormation/CF_template.yaml) and providing appropriate [parameters](./AWS/CloudFormation/README.md).
+- Stack example
+![CloudFormation Stack example](./etc/CloudFormation_example.png)
 
 2. Once the stack has been created, obtain the State Machine's ARN from the stack output.
 
