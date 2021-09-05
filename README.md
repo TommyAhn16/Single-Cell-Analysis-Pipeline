@@ -2,7 +2,7 @@
 
 ## Overview
 
-Analyzing sequenced single cell raw data requires considerable amount of compute resource and time. There exists a clear limitation to operate pipelines using only on-premise resources. Deploying the pipeline in AWS helped save cost and time through parallel computing and pay-as-you-go cost model. This repository shows how I integrated AWS services such as Batch, Step Functions, Lambda, EC2, and CloudFormation to form a complete pipeline in AWS.
+Analyzing sequenced single-cell raw data requires considerable amount of compute resource and time. There exists a clear limitation to operate pipelines using only on-premise resources. Deploying the pipeline in AWS helped save cost and time through parallel computing and pay-as-you-go cost model. This repository shows how I integrated AWS services such as Batch, Step Functions, Lambda, EC2, and CloudFormation to form a complete pipeline in AWS.
 
 ## Diagram of the Pipeline
 
@@ -45,7 +45,7 @@ $ chmod +x run_pipeline.py
 - Required variables:
   - "AWS_KEY" : your aws access key
   - "AWS_SECRET_KEY": your aws secret key
-  - REGION: your region,
+  - "REGION": your aws region,
   - "SAMPLE_ID": sample ID name of the .fastq files
   - "CR_DOWNLOAD_BUCKET": S3 bucket name where Cellranger input files are stored
   - "CR_UPLOAD_BUCKET": S3 bucket name where Cellranger result files will be stored
